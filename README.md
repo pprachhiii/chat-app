@@ -88,31 +88,6 @@ Before you start, ensure you have the following installed:
 
 ---
 
-## 🚪 Routes (Frontend)
-
-### Public Routes
-
-- **/signup**: Sign-up page for new users.
-- **/login**: Login page for existing users.
-
-### Protected Routes
-
-- **/**: Home page for authenticated users.
-- **/settings**: Settings page.
-- **/profile**: Profile page for authenticated users.
-
-### Navigation
-
-The app features a **Navbar** that contains links to the **Home**, **Settings**, and **Profile** pages, with conditional rendering based on the user's authentication status.
-
----
-
-## 🌒 Theme Management
-
-- **Light/Dark Mode**: The app supports dynamic theme switching based on user preferences. The theme is managed using **Zustand** and can be toggled across the app.
-
----
-
 ## 🚀 Future Features
 
 1. **Group Chat**: Allow users to create and join group chats for conversations with multiple participants.
