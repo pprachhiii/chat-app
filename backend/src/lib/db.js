@@ -6,9 +6,19 @@ export const connectDB = async () => {
       throw new Error("MONGO_URI is not defined in the .env file");
     }
 
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("Mongoose connected!");
+    mongoose.set("strictQuery", true);
+    if (process.env.NODE_ENV === "development") {
+      mongoose.set("debug", true);
+    }
+
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log("Mongoose connected successfully");
   } catch (err) {
-    console.error("Mongoose not connected!", err);
+    console.error("Database connection failed", err.message);
+    process.exit(1); // ensure app doesn't run without DB
   }
 };

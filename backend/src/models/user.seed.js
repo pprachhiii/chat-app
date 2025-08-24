@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { connectDB } from "../lib/db.js";
-import User from "../models/user-model.js";
+import { User } from "./models.js";
 
 // Get current file path (__dirname equivalent for ES modules)
 const __filename = fileURLToPath(import.meta.url);
