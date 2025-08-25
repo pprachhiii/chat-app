@@ -1,35 +1,25 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Lock, Loader2, CheckCircle2 } from "lucide-react";
-import toast from "react-hot-toast";
-import { axiosInstance } from "../lib/axios.js";
+import { useAuthStore } from "../store/useAuthStore";
 
 const ResetPasswordPage = () => {
   const [search] = useSearchParams();
   const token = search.get("token");
   const navigate = useNavigate();
+  const { resetPassword, isResettingPassword } = useAuthStore();
   const [form, setForm] = useState({ newPassword: "", retypePassword: "" });
-  const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!token) return toast.error("Missing reset token");
-    if (form.newPassword.length < 6)
-      return toast.error("Password must be at least 6 characters");
-    if (form.newPassword !== form.retypePassword)
-      return toast.error("Passwords do not match");
+    if (!token) return;
+    if (form.newPassword.length < 6) return;
+    if (form.newPassword !== form.retypePassword) return;
 
-    setLoading(true);
-    try {
-      await axiosInstance.post(`/auth/reset-password/${token}`, form);
-      setDone(true);
-      toast.success("Password reset successful");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Password reset failed");
-    } finally {
-      setLoading(false);
-    }
+    await resetPassword(token, form);
+    setDone(true);
+    setForm({ newPassword: "", retypePassword: "" });
   };
 
   if (done) {
@@ -56,7 +46,7 @@ const ResetPasswordPage = () => {
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-base-200 rounded-xl p-6">
         <h1 className="text-xl font-semibold mb-4">Reset Password</h1>
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="label text-sm">
               <span className="label-text">New Password</span>
@@ -91,8 +81,11 @@ const ResetPasswordPage = () => {
               />
             </div>
           </div>
-          <button className="btn btn-primary w-full" disabled={loading}>
-            {loading ? (
+          <button
+            className="btn btn-primary w-full"
+            disabled={isResettingPassword}
+          >
+            {isResettingPassword ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" /> Updating...
               </>

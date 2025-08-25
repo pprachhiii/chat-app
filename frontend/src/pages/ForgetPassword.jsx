@@ -1,29 +1,15 @@
 import { useState } from "react";
 import { Mail, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import { axiosInstance } from "../lib/axios.js";
+import { useAuthStore } from "../store/useAuthStore";
 
 const ForgotPasswordPage = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { forgotPassword, isResettingPassword } = useAuthStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await axiosInstance.post("/auth/forgot-password", { email });
-      toast.success("Password reset link sent. Check your email.");
-      // Assuming backend returns token for frontend redirect (optional)
-      if (res.data?.resetToken) {
-        navigate(`/reset-password?token=${res.data.resetToken}`);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to send reset link");
-    } finally {
-      setLoading(false);
-    }
+    await forgotPassword({ email });
+    setEmail("");
   };
 
   return (
@@ -47,8 +33,11 @@ const ForgotPasswordPage = () => {
               />
             </div>
           </div>
-          <button className="btn btn-primary w-full" disabled={loading}>
-            {loading ? (
+          <button
+            className="btn btn-primary w-full"
+            disabled={isResettingPassword}
+          >
+            {isResettingPassword ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" /> Sending...
               </>

@@ -85,12 +85,16 @@ export const useAuthStore = create((set, get) => ({
 
   // Forgot Password (send reset link)
   forgotPassword: async (data) => {
+    set({ isResettingPassword: true });
     try {
       const res = await axiosInstance.post("/auth/forgot-password", data);
-      toast.success("Password reset link sent to email");
-      return res.data;
+      toast.success(res.data.message || "Password reset link sent to email");
+      return res.data; // contains only message
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send reset link");
+      throw error;
+    } finally {
+      set({ isResettingPassword: false });
     }
   },
 
@@ -98,10 +102,16 @@ export const useAuthStore = create((set, get) => ({
   resetPassword: async (token, data) => {
     set({ isResettingPassword: true });
     try {
-      await axiosInstance.post(`/auth/reset-password/${token}`, data);
-      toast.success("Password reset successfully, login again");
+      const res = await axiosInstance.post(
+        `/auth/reset-password/${token}`,
+        data
+      );
+      toast.success(
+        res.data.message || "Password reset successfully, login again"
+      );
     } catch (error) {
       toast.error(error.response?.data?.message || "Password reset failed");
+      throw error;
     } finally {
       set({ isResettingPassword: false });
     }
@@ -111,10 +121,11 @@ export const useAuthStore = create((set, get) => ({
   changePassword: async (data) => {
     set({ isChangingPassword: true });
     try {
-      await axiosInstance.post("/auth/change-password", data);
-      toast.success("Password changed successfully");
+      const res = await axiosInstance.post("/auth/change-password", data);
+      toast.success(res.data.message || "Password changed successfully");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to change password");
+      throw error;
     } finally {
       set({ isChangingPassword: false });
     }
