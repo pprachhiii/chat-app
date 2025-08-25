@@ -39,9 +39,7 @@ const App = () => {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-3">
         <Loader className="size-10 animate-spin text-primary" />
-        <p className="text-sm text-base-content/70">
-          Checking authentication...
-        </p>
+        <p className="text-sm text-base-content/70">Loading...</p>
       </div>
     );
   }

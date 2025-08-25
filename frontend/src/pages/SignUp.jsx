@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import {
   Eye,
@@ -13,6 +12,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import AuthImagePattern from "../components/AuthImagePattern";
 import toast from "react-hot-toast";
+import { useState } from "react";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
-  const { signup, isSigningUp } = useAuthStore(); // Removed verifyEmail
+  const { signup, isSigningUp } = useAuthStore();
 
   const validateForm = () => {
     if (!formData.username.trim()) return toast.error("Username is required");
@@ -44,7 +44,9 @@ const SignUpPage = () => {
     if (!validateForm()) return;
     try {
       await signup(formData);
-      toast.success("Signup successful! You can now log in and receive OTP.");
+      toast.success(
+        "Signup successful! Welcome aboard. You can now log in and receive OTP."
+      );
       navigate("/login");
     } catch (err) {
       if (err?.message) toast.error(err.message);
@@ -52,89 +54,83 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-gray-50">
+      {/* Left Form Section */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2">
-              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <MessageSquare className="size-6 text-primary" />
+        <div className="w-full max-w-md space-y-10">
+          {/* Header */}
+          <div className="text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div
+                className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-lg 
+                transition-transform duration-300 hover:scale-105 hover:bg-blue-500 group"
+              >
+                <MessageSquare className="w-7 h-7 text-blue-500 group-hover:text-white transition-colors duration-300" />
               </div>
-              <h1 className="text-2xl font-bold mt-2">Create Account</h1>
-              <p className="text-base-content/60">
-                Get started with your free account
+              <h1 className="text-3xl font-extrabold mt-2 text-gray-800">
+                Create Your Account
+              </h1>
+              <p className="text-gray-600 max-w-xs">
+                Explore, experiment, and share your ideas.
               </p>
             </div>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Username</span>
-              </label>
-              <div className="relative">
-                <AtSign className="size-5 text-base-content/40 absolute left-3 top-3" />
-                <input
-                  type="text"
-                  className="input input-bordered w-full pl-10"
-                  placeholder="johndoe"
-                  value={formData.username}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      username: e.target.value.toLowerCase(),
-                    })
-                  }
-                />
-              </div>
-            </div>
+            {[
+              {
+                label: "Username",
+                placeholder: "Enter Your Username",
+                icon: AtSign,
+                value: formData.username,
+                onChange: (v) =>
+                  setFormData({ ...formData, username: v.toLowerCase() }),
+              },
+              {
+                label: "Full Name",
+                placeholder: "Enter Your Name",
+                icon: User,
+                value: formData.fullName,
+                onChange: (v) => setFormData({ ...formData, fullName: v }),
+              },
+              {
+                label: "Email",
+                placeholder: "you@example.com",
+                icon: Mail,
+                value: formData.email,
+                onChange: (v) => setFormData({ ...formData, email: v }),
+              },
+            ].map((field, idx) => {
+              const Icon = field.icon;
+              return (
+                <div key={idx} className="flex flex-col">
+                  <label className="mb-2 font-medium text-gray-700">
+                    {field.label}
+                  </label>
+                  <div className="relative">
+                    <Icon className="w-5 h-5 text-gray-400 absolute left-4 top-3" />
+                    <input
+                      type={field.label === "Email" ? "email" : "text"}
+                      placeholder={field.placeholder}
+                      className="w-full pl-12 py-3 rounded-2xl bg-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 transition"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </div>
+                </div>
+              );
+            })}
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Full Name</span>
-              </label>
+            {/* Password */}
+            <div className="flex flex-col">
+              <label className="mb-2 font-medium text-gray-700">Password</label>
               <div className="relative">
-                <User className="size-5 text-base-content/40 absolute left-3 top-3" />
-                <input
-                  type="text"
-                  className="input input-bordered w-full pl-10"
-                  placeholder="John Doe"
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, fullName: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Email</span>
-              </label>
-              <div className="relative">
-                <Mail className="size-5 text-base-content/40 absolute left-3 top-3" />
-                <input
-                  type="email"
-                  className="input input-bordered w-full pl-10"
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Password</span>
-              </label>
-              <div className="relative">
-                <Lock className="size-5 text-base-content/40 absolute left-3 top-3" />
+                <Lock className="w-5 h-5 text-gray-400 absolute left-4 top-3" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="input input-bordered w-full pl-10"
                   placeholder="••••••••"
+                  className="w-full pl-12 py-3 rounded-2xl bg-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 transition"
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
@@ -146,33 +142,39 @@ const SignUpPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="size-5 text-base-content/40" />
+                    <EyeOff className="w-5 h-5 text-gray-400" />
                   ) : (
-                    <Eye className="size-5 text-base-content/40" />
+                    <Eye className="w-5 h-5 text-gray-400" />
                   )}
                 </button>
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
-              className="btn btn-primary w-full"
+              className="w-full py-3 rounded-2xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-transform hover:scale-105 shadow-md"
               disabled={isSigningUp}
             >
               {isSigningUp ? (
-                <>
-                  <Loader2 className="size-5 animate-spin" /> Loading...
-                </>
+                <div className="flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  Creating your account...
+                </div>
               ) : (
                 "Create Account"
               )}
             </button>
           </form>
 
-          <div className="text-center">
-            <p className="text-base-content/60">
+          {/* Login Link */}
+          <div className="text-center mt-2">
+            <p className="text-gray-500">
               Already have an account?{" "}
-              <Link to="/login" className="link link-primary">
+              <Link
+                to="/login"
+                className="text-blue-500 font-medium hover:underline"
+              >
                 Sign in
               </Link>
             </p>
@@ -180,9 +182,10 @@ const SignUpPage = () => {
         </div>
       </div>
 
+      {/* Right Illustration */}
       <AuthImagePattern
-        title="Join our community"
-        subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
+        title="Welcome! Explore this project."
+        subtitle="Dive in, explore, and share your thoughts."
       />
     </div>
   );
