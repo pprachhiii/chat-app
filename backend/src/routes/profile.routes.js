@@ -3,7 +3,7 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 import {
   updateProfile,
   getUserMiniProfile,
-} from "../controllers/profileController.js";
+} from "../controllers/profile.controller.js";
 
 const router = express.Router();
 

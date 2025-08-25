@@ -1,6 +1,7 @@
 const MessageSkeleton = () => {
-  // Create an array of 6 items for skeleton messages
   const skeletonMessages = Array(6).fill(null);
+  const widths = ["w-[120px]", "w-[180px]", "w-[220px]", "w-[160px]"];
+  const heights = ["h-6", "h-10", "h-16"];
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -11,16 +12,20 @@ const MessageSkeleton = () => {
         >
           <div className="chat-image avatar">
             <div className="size-10 rounded-full">
-              <div className="skeleton w-full h-full rounded-full" />
+              <div className="skeleton w-full h-full rounded-full animate-pulse" />
             </div>
           </div>
 
           <div className="chat-header mb-1">
-            <div className="skeleton h-4 w-16" />
+            <div className="skeleton h-4 w-16 animate-pulse" />
           </div>
 
           <div className="chat-bubble bg-transparent p-0">
-            <div className="skeleton h-16 w-[200px]" />
+            <div
+              className={`skeleton ${heights[idx % heights.length]} ${
+                widths[idx % widths.length]
+              } animate-pulse`}
+            />
           </div>
         </div>
       ))}

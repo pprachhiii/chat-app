@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       maxlength: 160,
-      default: "Hey there! I'm using ChatApp 🚀",
+      default: "Hey there! I'm using ChatApp",
     },
 
     contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

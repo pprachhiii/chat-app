@@ -75,7 +75,6 @@ export const resetPassword = async (req, res) => {
     user.resetPasswordExpiry = undefined;
     await user.save();
 
-    // Send professional email confirmation using template
     const emailHTML = passwordResetSuccessTemplate(user.fullName);
     await sendEmail(user.email, "Password Updated Successfully", emailHTML);
 

@@ -1,6 +1,9 @@
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Plus } from "lucide-react";
+import { useChatStore } from "../store/useChatStore";
 
 const NoChatSelected = () => {
+  const { setSelectedChat } = useChatStore();
+
   return (
     <div className="w-full flex flex-1 flex-col items-center justify-center p-16 bg-base-100/50">
       <div className="max-w-md text-center space-y-6">
@@ -21,6 +24,14 @@ const NoChatSelected = () => {
         <p className="text-base-content/60">
           Select a conversation from the sidebar to start chatting
         </p>
+
+        {/* (Optional) Start Chat Button */}
+        <button
+          className="btn btn-primary mt-4 flex items-center gap-2"
+          onClick={() => setSelectedChat(null)} // could open a modal or search instead
+        >
+          <Plus size={18} /> Start a new chat
+        </button>
       </div>
     </div>
   );

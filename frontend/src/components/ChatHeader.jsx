@@ -3,8 +3,30 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 
 const ChatHeader = () => {
-  const { selectedUser, setSelectedUser } = useChatStore();
-  const { onlineUsers } = useAuthStore();
+  const { selectedChat, setSelectedChat } = useChatStore();
+  const { authUser, onlineUsers } = useAuthStore();
+
+  if (!selectedChat) return null;
+
+  // Determine chat display info
+  let chatName = "";
+  let chatAvatar = "/avatar.png";
+  let isOnline = false;
+
+  if (selectedChat.isGroup) {
+    chatName = selectedChat.name || "Group Chat";
+    chatAvatar = "/group-avatar.png";
+  } else {
+    // For 1-to-1 chat, find the other user
+    const otherUser = selectedChat.participants.find(
+      (u) => u._id !== authUser._id
+    );
+    if (otherUser) {
+      chatName = otherUser.fullName || otherUser.username;
+      chatAvatar = otherUser.profilePic || "/avatar.png";
+      isOnline = onlineUsers.includes(otherUser._id);
+    }
+  }
 
   return (
     <div className="p-2.5 border-b border-base-300">
@@ -13,28 +35,28 @@ const ChatHeader = () => {
           {/* Avatar */}
           <div className="avatar">
             <div className="size-10 rounded-full relative">
-              <img
-                src={selectedUser.profilePic || "/avatar.png"}
-                alt={selectedUser.fullName}
-              />
+              <img src={chatAvatar} alt={chatName} />
             </div>
           </div>
 
-          {/* User info */}
+          {/* Chat info */}
           <div>
-            <h3 className="font-medium">{selectedUser.fullName}</h3>
-            <p className="text-sm text-base-content/70">
-              {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
-            </p>
+            <h3 className="font-medium">{chatName}</h3>
+            {!selectedChat.isGroup && (
+              <p className="text-sm text-base-content/70">
+                {isOnline ? "Online" : "Offline"}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Close button */}
-        <button onClick={() => setSelectedUser(null)}>
+        <button onClick={() => setSelectedChat(null)}>
           <X />
         </button>
       </div>
     </div>
   );
 };
+
 export default ChatHeader;

@@ -3,7 +3,7 @@ import {
   getChats,
   accessChat,
   createGroupChat,
-} from "../controllers/chatController.js";
+} from "../controllers/chat.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();

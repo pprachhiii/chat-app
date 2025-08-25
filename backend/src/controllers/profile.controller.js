@@ -1,6 +1,5 @@
-// -----------------------
-// UPDATE PROFILE
-// -----------------------
+import { User } from "../models/models.js";
+
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;

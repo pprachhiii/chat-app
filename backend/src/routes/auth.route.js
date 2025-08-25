@@ -4,15 +4,15 @@ import {
   login,
   logout,
   checkAuth,
-} from "../controllers/authController.js";
+} from "../controllers/auth.controller.js";
 import {
   verifyEmail,
   verifyLoginOTP,
-} from "../controllers/verifyController.js";
+} from "../controllers/verify.controller.js";
 import {
   forgotPassword,
   resetPassword,
-} from "../controllers/passwordController.js";
+} from "../controllers/password.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();

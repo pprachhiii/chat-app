@@ -1,6 +1,4 @@
 import { Chat, Message, User } from "../models/models.js";
-import cloudinary from "../lib/cloudinary.js";
-import { getReceiverSocketId, io } from "../lib/socket.js";
 
 // -----------------------
 // Get all chats for logged-in user (sidebar)
