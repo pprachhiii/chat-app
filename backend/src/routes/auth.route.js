@@ -12,6 +12,7 @@ import {
 import {
   forgotPassword,
   resetPassword,
+  changePassword,
 } from "../controllers/password.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
@@ -20,17 +21,18 @@ const router = express.Router();
 // -----------------------
 // PUBLIC ROUTES
 // -----------------------
-router.post("/signup", signup); // Register a new user + send verification email
-router.post("/login", login); // Login and send OTP
-router.post("/verify-login-otp", verifyLoginOTP); // Verify OTP for login
-router.get("/verify-email/:token", verifyEmail); // Verify email link
-router.post("/forgot-password", forgotPassword); // Verify previous password & get reset token
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/verify-login-otp", verifyLoginOTP);
+router.get("/verify-email/:token", verifyEmail);
+router.post("/forgot-password", forgotPassword); // Send reset token via email
 router.post("/reset-password/:token", resetPassword); // Reset password using token
 
 // -----------------------
 // PROTECTED ROUTES
 // -----------------------
-router.get("/check-auth", protectRoute, checkAuth); // Check if user is authenticated
-router.post("/logout", protectRoute, logout); // Logout user
+router.get("/check-auth", protectRoute, checkAuth);
+router.post("/logout", protectRoute, logout);
+router.post("/change-password", protectRoute, changePassword);
 
 export default router;
