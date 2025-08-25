@@ -8,9 +8,9 @@ import { connectDB } from "./lib/db.js";
 import { app, server } from "./lib/socket.js";
 
 import authRoutes from "./routes/auth.route.js";
-import chatRoutes from "./routes/chat.routes.js";
 import messageRoutes from "./routes/message.route.js";
 import profileRoutes from "./routes/profile.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 dotenv.config();
 
@@ -34,9 +34,9 @@ app.use(
 // ROUTES
 // -----------------------
 app.use("/api/auth", authRoutes);
-app.use("/api/chats", chatRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/users", userRoutes);
 
 // -----------------------
 // SERVE FRONTEND IN PRODUCTION

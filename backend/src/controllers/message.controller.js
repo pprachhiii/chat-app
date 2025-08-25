@@ -1,23 +1,29 @@
-import { Message, Chat, User } from "../models/models.js";
+import { Message, User } from "../models/models.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
 // -----------------------
-// Get messages for a chat
+// Get messages between two users
 // -----------------------
 export const getMessages = async (req, res) => {
   try {
-    const { chatId } = req.params;
+    const userId1 = req.user._id;
+    const { userId2 } = req.params; // the other participant
 
-    const messages = await Message.find({ chatId })
+    // Fetch messages where either user is sender or receiver
+    const messages = await Message.find({
+      $or: [
+        { senderId: userId1, receiverId: userId2 },
+        { senderId: userId2, receiverId: userId1 },
+      ],
+    })
+      .sort({ createdAt: 1 }) // oldest first
       .populate("senderId", "username fullName profilePic status")
       .populate("replyTo", "text senderId");
 
-    // Mark all unread messages from other participants as "read"
+    // Mark unread messages as read
     const unreadMessages = messages.filter(
-      (msg) =>
-        msg.senderId._id.toString() !== req.user._id.toString() &&
-        msg.status !== "read"
+      (msg) => msg.senderId._id.toString() === userId2 && msg.status !== "read"
     );
     await Promise.all(
       unreadMessages.map(async (msg) => {
@@ -34,13 +40,12 @@ export const getMessages = async (req, res) => {
 };
 
 // -----------------------
-// Send a message
+// Send a message to a user
 // -----------------------
 export const sendMessage = async (req, res) => {
   try {
-    const { text, messageType, file } = req.body;
-    const { chatId } = req.params;
     const senderId = req.user._id;
+    const { receiverId, text, messageType, file } = req.body;
 
     let fileUrl;
     if (file) {
@@ -49,8 +54,8 @@ export const sendMessage = async (req, res) => {
     }
 
     const newMessage = new Message({
-      chatId,
       senderId,
+      receiverId,
       messageType: messageType || (file ? "image" : "text"),
       text: text || "",
       fileUrl: fileUrl || "",
@@ -58,17 +63,9 @@ export const sendMessage = async (req, res) => {
 
     await newMessage.save();
 
-    // Update lastMessage in Chat
-    await Chat.findByIdAndUpdate(chatId, { lastMessage: newMessage._id });
-
-    // Emit via socket to participants
-    const chat = await Chat.findById(chatId);
-    chat.participants.forEach((participantId) => {
-      if (participantId.toString() !== senderId.toString()) {
-        const socketId = getReceiverSocketId(participantId);
-        if (socketId) io.to(socketId).emit("newMessage", newMessage);
-      }
-    });
+    // Emit via socket to the receiver
+    const socketId = getReceiverSocketId(receiverId);
+    if (socketId) io.to(socketId).emit("newMessage", newMessage);
 
     const populatedMessage = await newMessage.populate(
       "senderId",

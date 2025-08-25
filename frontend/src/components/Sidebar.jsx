@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
@@ -7,116 +7,57 @@ import { Users } from "lucide-react";
 const Sidebar = () => {
   const { getChats, chats, selectedChat, setSelectedChat, isChatsLoading } =
     useChatStore();
-  const { authUser, onlineUsers } = useAuthStore();
-  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
+  const { authUser } = useAuthStore();
 
   useEffect(() => {
     getChats();
   }, [getChats]);
 
-  const filteredChats = showOnlineOnly
-    ? chats.filter((chat) =>
-        chat.isGroupChat
-          ? true
-          : chat.users.some(
-              (u) => u._id !== authUser._id && onlineUsers.includes(u._id)
-            )
-      )
-    : chats;
-
   if (isChatsLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-zinc-200 flex flex-col bg-white shadow-md rounded-r-xl transition-all duration-300">
+    <aside className="h-full border-r border-gray-200 flex flex-col bg-white shadow-md rounded-r-2xl transition-all duration-300">
       {/* Header */}
-      <div className="border-b border-zinc-200 w-full p-5">
-        <div className="flex items-center gap-2">
-          <Users className="size-6 text-indigo-500" />
-          <span className="font-semibold hidden lg:block text-indigo-600">
-            Chats
-          </span>
-        </div>
-
-        {/* Online filter toggle */}
-        <div className="mt-3 hidden lg:flex items-center gap-2">
-          <label className="cursor-pointer flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={showOnlineOnly}
-              onChange={(e) => setShowOnlineOnly(e.target.checked)}
-              className="checkbox checkbox-sm"
-            />
-            <span className="text-sm text-zinc-600">Show online only</span>
-          </label>
-          <span className="text-xs text-zinc-400">
-            ({onlineUsers.length - 1} online)
-          </span>
-        </div>
+      <div className="border-b border-gray-200 w-full p-5 flex items-center gap-2">
+        <Users className="w-6 h-6 text-indigo-500" />
+        <span className="font-semibold text-indigo-600">Chats</span>
       </div>
 
-      {/* Chat list */}
-      <div className="overflow-y-auto w-full py-3">
-        {filteredChats.map((chat) => {
-          const isGroup = chat.isGroupChat;
-          const otherUser = !isGroup
-            ? chat.users.find((u) => u._id !== authUser._id)
-            : null;
+      {/* Chats List */}
+      <div className="overflow-y-auto w-full py-3 flex-1">
+        {chats.length > 0 ? (
+          chats.map((chat) => {
+            const otherUser = chat.users.find((u) => u._id !== authUser._id);
+            const profilePic = otherUser?.profilePic?.url || "/avatar.png";
+            const name = otherUser?.fullName || otherUser?.username;
 
-          const profilePic = isGroup
-            ? chat.chatImage || "/group.png"
-            : otherUser?.profilePic || "/avatar.png";
-
-          const name = isGroup ? chat.chatName : otherUser?.fullName;
-
-          const isOnline =
-            !isGroup && otherUser ? onlineUsers.includes(otherUser._id) : false;
-
-          return (
-            <button
-              key={chat._id}
-              onClick={() => setSelectedChat(chat)}
-              className={`
-                w-full p-3 flex items-center gap-3
-                rounded-lg hover:bg-indigo-50 transition-colors duration-200
-                ${
+            return (
+              <button
+                key={chat._id}
+                onClick={() => setSelectedChat(chat)}
+                className={`w-full p-3 flex items-center gap-3 rounded-xl hover:bg-indigo-50 transition-colors duration-200 ${
                   selectedChat?._id === chat._id
-                    ? "bg-indigo-100 ring-1 ring-indigo-200"
+                    ? "bg-indigo-100 ring-2 ring-indigo-200"
                     : ""
-                }
-              `}
-            >
-              <div className="relative mx-auto lg:mx-0">
+                }`}
+              >
                 <img
                   src={profilePic}
                   alt={name}
-                  className="size-12 object-cover rounded-full shadow-sm"
+                  className="w-12 h-12 object-cover rounded-full shadow-sm"
                 />
-                {!isGroup && isOnline && (
-                  <span
-                    className="absolute bottom-0 right-0 size-3 bg-green-500 
-                    rounded-full ring-2 ring-white"
-                  />
-                )}
-              </div>
-
-              {/* Chat info - only visible on larger screens */}
-              <div className="hidden lg:block text-left min-w-0">
-                <div className="font-medium truncate text-zinc-700">{name}</div>
-                <div className="text-sm text-zinc-400">
-                  {isGroup
-                    ? `${chat.users.length} members`
-                    : isOnline
-                    ? "Online"
-                    : "Offline"}
+                <div className="text-left min-w-0 hidden lg:block">
+                  <div className="font-medium truncate text-gray-800">
+                    {name}
+                  </div>
+                  <div className="text-sm text-gray-400">Chat</div>
                 </div>
-              </div>
-            </button>
-          );
-        })}
-
-        {filteredChats.length === 0 && (
-          <div className="text-center text-zinc-400 py-4">
-            No chats found. Try toggling "Show online only"!
+              </button>
+            );
+          })
+        ) : (
+          <div className="text-center text-gray-400 py-4">
+            No chats started yet. Start a new chat to begin!
           </div>
         )}
       </div>

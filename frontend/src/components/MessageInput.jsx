@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { Image, Paperclip, Mic, Send, X } from "lucide-react";
+import { Paperclip, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 const MessageInput = () => {
@@ -14,19 +14,12 @@ const MessageInput = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Detect type
-    if (file.type.startsWith("image/")) {
-      setFileType("image");
-    } else if (file.type.startsWith("audio/")) {
-      setFileType("voice");
-    } else {
-      setFileType("file");
-    }
+    if (file.type.startsWith("image/")) setFileType("image");
+    else if (file.type.startsWith("audio/")) setFileType("voice");
+    else setFileType("file");
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setFilePreview(reader.result);
-    };
+    reader.onloadend = () => setFilePreview(reader.result);
     reader.readAsDataURL(file);
   };
 
@@ -51,12 +44,8 @@ const MessageInput = () => {
         messageType: fileType || "text",
         fileUrl: filePreview || null,
       });
-
-      // Clear form
       setText("");
-      setFilePreview(null);
-      setFileType(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      removeFile();
     } catch (error) {
       console.error("Failed to send message:", error);
       toast.error("Failed to send message");
@@ -64,7 +53,7 @@ const MessageInput = () => {
   };
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full bg-gray-50">
       {/* File preview */}
       {filePreview && (
         <div className="mb-3 flex items-center gap-2">
@@ -73,7 +62,7 @@ const MessageInput = () => {
               <img
                 src={filePreview}
                 alt="Preview"
-                className="w-20 h-20 object-cover rounded-lg border border-zinc-700"
+                className="w-20 h-20 object-cover rounded-lg border border-gray-300"
               />
             )}
             {fileType === "voice" && (
@@ -83,17 +72,16 @@ const MessageInput = () => {
               </audio>
             )}
             {fileType === "file" && (
-              <div className="p-2 border rounded-lg bg-base-200">
+              <div className="p-2 border rounded-lg bg-gray-100 text-gray-700">
                 📎 File selected
               </div>
             )}
             <button
               onClick={removeFile}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center"
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center shadow-sm hover:bg-gray-300 transition"
               type="button"
             >
-              <X className="size-3" />
+              <X className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -103,10 +91,10 @@ const MessageInput = () => {
         <div className="flex-1 flex gap-2">
           <input
             type="text"
-            className="w-full input input-bordered rounded-lg input-sm sm:input-md"
             placeholder="Type a message..."
             value={text}
             onChange={(e) => setText(e.target.value)}
+            className="flex-1 px-4 py-2 rounded-2xl border border-gray-300 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
           <input
             type="file"
@@ -118,18 +106,22 @@ const MessageInput = () => {
           {/* File upload button */}
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle ${
-              filePreview ? "text-emerald-500" : "text-zinc-400"
-            }`}
             onClick={() => fileInputRef.current?.click()}
+            className={`hidden sm:flex w-10 h-10 rounded-full items-center justify-center shadow-sm transition-colors ${
+              filePreview
+                ? "text-emerald-500 hover:bg-emerald-100"
+                : "text-gray-400 hover:bg-gray-100"
+            }`}
           >
             <Paperclip size={20} />
           </button>
         </div>
+
+        {/* Send button */}
         <button
           type="submit"
-          className="btn btn-sm btn-circle"
           disabled={!text.trim() && !filePreview}
+          className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-md hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Send size={22} />
         </button>

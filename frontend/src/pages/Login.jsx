@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../components/AuthImagePattern";
-import { Link, useNavigate } from "react-router-dom"; // added useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
 
 const LoginPage = () => {
-  const navigate = useNavigate(); // initialize navigate
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const { login, isLoggingIn } = useAuthStore();
@@ -19,16 +19,16 @@ const LoginPage = () => {
     if (!formData.password) return toast.error("Password is required");
 
     try {
-      await login(formData); // login with email + password
+      await login(formData);
       toast.success("Logged in successfully!");
-      navigate("/"); // redirect to home page after login
+      navigate("/");
     } catch (err) {
       toast.error(err?.message || "Login failed");
     }
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] grid lg:grid-cols-2 bg-gray-50">
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-10">
           <div className="text-center">
@@ -46,6 +46,7 @@ const LoginPage = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email input */}
             <div className="flex flex-col">
               <label className="mb-2 font-medium text-gray-700">Email</label>
               <div className="relative">
@@ -63,6 +64,7 @@ const LoginPage = () => {
               </div>
             </div>
 
+            {/* Password input */}
             <div className="flex flex-col">
               <label className="mb-2 font-medium text-gray-700">Password</label>
               <div className="relative">
@@ -91,6 +93,7 @@ const LoginPage = () => {
               </div>
             </div>
 
+            {/* Submit button */}
             <button
               type="submit"
               className="w-full py-3 rounded-2xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-transform hover:scale-105 shadow-md"
@@ -107,6 +110,7 @@ const LoginPage = () => {
             </button>
           </form>
 
+          {/* Links */}
           <div className="flex flex-col items-center text-center mt-2 space-y-2">
             <Link
               to="/forgot-password"
@@ -127,6 +131,7 @@ const LoginPage = () => {
         </div>
       </div>
 
+      {/* Right image section */}
       <AuthImagePattern
         title="Welcome back!"
         subtitle="Dive in, explore, and share your thoughts."

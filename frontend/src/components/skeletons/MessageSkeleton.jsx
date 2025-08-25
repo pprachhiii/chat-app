@@ -4,31 +4,46 @@ const MessageSkeleton = () => {
   const heights = ["h-6", "h-10", "h-16"];
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {skeletonMessages.map((_, idx) => (
-        <div
-          key={idx}
-          className={`chat ${idx % 2 === 0 ? "chat-start" : "chat-end"}`}
-        >
-          <div className="chat-image avatar">
-            <div className="size-10 rounded-full">
-              <div className="skeleton w-full h-full rounded-full animate-pulse" />
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      {skeletonMessages.map((_, idx) => {
+        const isOwnMessage = idx % 2 !== 0;
+        return (
+          <div
+            key={idx}
+            className={`flex flex-col ${
+              isOwnMessage ? "items-end" : "items-start"
+            } space-y-1`}
+          >
+            {/* Avatar */}
+            <div className="flex items-center mb-1 gap-2">
+              {!isOwnMessage && (
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                  <div className="w-full h-full rounded-full animate-pulse bg-gray-300" />
+                </div>
+              )}
+
+              {isOwnMessage && (
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                  <div className="w-full h-full rounded-full animate-pulse bg-gray-300" />
+                </div>
+              )}
+            </div>
+
+            {/* Message bubble */}
+            <div
+              className={`max-w-[70%] rounded-2xl p-3 shadow-md ${
+                isOwnMessage ? "bg-blue-500" : "bg-white"
+              }`}
+            >
+              <div
+                className={`animate-pulse rounded ${
+                  heights[idx % heights.length]
+                } ${widths[idx % widths.length]}`}
+              />
             </div>
           </div>
-
-          <div className="chat-header mb-1">
-            <div className="skeleton h-4 w-16 animate-pulse" />
-          </div>
-
-          <div className="chat-bubble bg-transparent p-0">
-            <div
-              className={`skeleton ${heights[idx % heights.length]} ${
-                widths[idx % widths.length]
-              } animate-pulse`}
-            />
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

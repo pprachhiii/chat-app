@@ -21,38 +21,21 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
-    fullName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-      select: false, // don’t return password by default
-    },
-
-    // Cloudinary profile picture
+    fullName: { type: String, required: true, trim: true },
+    password: { type: String, required: true, minlength: 6, select: false },
     profilePic: {
       public_id: { type: String, default: "" },
       url: { type: String, default: "" },
     },
-
     bio: {
       type: String,
       maxlength: 160,
       default: "Hey there! I'm using ChatApp",
     },
-
     contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-
-    // Forgot / Reset password
     resetPasswordToken: String,
     resetPasswordExpiry: Date,
-
-    // Presence
     status: {
       type: String,
       enum: ["online", "offline", "away", "busy"],
@@ -63,14 +46,12 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
-// Method to compare passwords
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
@@ -78,45 +59,16 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
 const User = mongoose.model("User", userSchema);
 
 // =======================
-// CHAT/CONVERSATION MODEL
-// =======================
-const chatSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      trim: true,
-    }, // for group chats
-    isGroup: {
-      type: Boolean,
-      default: false,
-    },
-    participants: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    lastMessage: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message",
-    },
-  },
-  { timestamps: true }
-);
-
-const Chat = mongoose.model("Chat", chatSchema);
-
-// =======================
-// MESSAGE MODEL
+// MESSAGE MODEL (ONE-ON-ONE ONLY)
 // =======================
 const messageSchema = new mongoose.Schema(
   {
-    chatId: {
+    senderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Chat",
+      ref: "User",
       required: true,
     },
-    senderId: {
+    receiverId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -126,28 +78,16 @@ const messageSchema = new mongoose.Schema(
       enum: ["text", "image", "file", "voice"],
       default: "text",
     },
-    text: {
-      type: String,
-      trim: true,
-    },
+    text: { type: String, trim: true },
     fileUrl: String,
     status: {
       type: String,
       enum: ["sent", "delivered", "read"],
       default: "sent",
     },
-    isEdited: {
-      type: Boolean,
-      default: false,
-    },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
-    replyTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Message",
-    },
+    isEdited: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
     reactions: [
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -161,6 +101,6 @@ const messageSchema = new mongoose.Schema(
 const Message = mongoose.model("Message", messageSchema);
 
 // =======================
-// EXPORT ALL MODELS
+// EXPORT MODELS
 // =======================
-export { User, Chat, Message };
+export { User, Message };

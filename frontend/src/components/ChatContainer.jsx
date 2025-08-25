@@ -21,7 +21,7 @@ const ChatContainer = () => {
 
   useEffect(() => {
     if (selectedChat?._id) {
-      getMessages(selectedChat._id);
+      getMessages(selectedChat._id); // fetch messages with this user
       subscribeToMessages();
     }
     return () => unsubscribeFromMessages();
@@ -40,7 +40,7 @@ const ChatContainer = () => {
 
   if (isMessagesLoading) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="flex-1 flex flex-col overflow-auto bg-gray-50">
         <ChatHeader />
         <MessageSkeleton />
         <MessageInput />
@@ -50,89 +50,102 @@ const ChatContainer = () => {
 
   if (!selectedChat) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-500">
+      <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
         Select a chat to start messaging
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto bg-gray-50">
       <ChatHeader />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => {
-          const isOwnMessage = message.senderId === authUser._id;
+          const isOwnMessage = message.senderId._id === authUser._id;
 
           return (
             <div
               key={message._id}
-              className={`chat ${isOwnMessage ? "chat-end" : "chat-start"}`}
               ref={messageEndRef}
+              className={`flex flex-col ${
+                isOwnMessage ? "items-end" : "items-start"
+              }`}
             >
-              <div className="chat-image avatar">
-                <div className="size-10 rounded-full border">
-                  <img
-                    src={
-                      isOwnMessage
-                        ? authUser.profilePic || "/avatar.png"
-                        : message.sender?.profilePic || "/avatar.png"
-                    }
-                    alt="profile pic"
-                  />
+              {/* Avatar */}
+              <div className="flex items-center mb-1 gap-2">
+                {!isOwnMessage && (
+                  <div className="w-10 h-10 rounded-full overflow-hidden shadow-md flex-shrink-0">
+                    <img
+                      src={message.senderId.profilePic || "/avatar.png"}
+                      alt={message.senderId.username}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="flex flex-col text-sm">
+                  <span className="font-medium text-gray-800">
+                    {isOwnMessage ? "You" : message.senderId.username}
+                  </span>
+                  <time className="text-xs text-gray-400">
+                    {formatMessageTime(message.createdAt)}
+                  </time>
                 </div>
+
+                {isOwnMessage && (
+                  <div className="w-10 h-10 rounded-full overflow-hidden shadow-md flex-shrink-0">
+                    <img
+                      src={authUser.profilePic || "/avatar.png"}
+                      alt="You"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
 
-              <div className="chat-header mb-1 flex items-center gap-2">
-                <span className="text-sm font-medium">
-                  {isOwnMessage ? "You" : message.sender?.username}
-                </span>
-                <time className="text-xs opacity-50">
-                  {formatMessageTime(message.createdAt)}
-                </time>
-              </div>
-
-              <div className="chat-bubble flex flex-col">
-                {/* Deleted message */}
+              {/* Message bubble */}
+              <div
+                className={`max-w-[70%] p-3 rounded-2xl shadow-md text-gray-800 break-words ${
+                  isOwnMessage
+                    ? "bg-blue-500 text-white rounded-br-none"
+                    : "bg-white rounded-bl-none"
+                }`}
+              >
                 {message.isDeleted ? (
                   <p className="italic text-gray-400">
                     This message was deleted
                   </p>
                 ) : (
                   <>
-                    {/* File / Image / Voice */}
                     {message.messageType === "image" && message.fileUrl && (
                       <img
                         src={message.fileUrl}
                         alt="Attachment"
-                        className="sm:max-w-[200px] rounded-md mb-2"
+                        className="rounded-md mb-2 max-w-full"
                       />
                     )}
-
                     {message.messageType === "file" && message.fileUrl && (
                       <a
                         href={message.fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-500 underline mb-2"
+                        className="text-blue-500 underline mb-2 block"
                       >
                         📎 Download File
                       </a>
                     )}
-
                     {message.messageType === "voice" && message.fileUrl && (
-                      <audio controls className="mb-2">
+                      <audio controls className="mb-2 w-full">
                         <source src={message.fileUrl} type="audio/mpeg" />
                         Your browser does not support the audio element.
                       </audio>
                     )}
-
-                    {/* Text */}
                     {message.text && (
                       <p>
                         {message.text}
                         {message.isEdited && (
-                          <span className="ml-1 text-xs opacity-50">
+                          <span className="ml-1 text-xs text-gray-400">
                             (edited)
                           </span>
                         )}

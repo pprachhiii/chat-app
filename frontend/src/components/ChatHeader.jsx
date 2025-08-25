@@ -4,55 +4,49 @@ import { useChatStore } from "../store/useChatStore";
 
 const ChatHeader = () => {
   const { selectedChat, setSelectedChat } = useChatStore();
-  const { authUser, onlineUsers } = useAuthStore();
+  const { onlineUsers } = useAuthStore();
 
   if (!selectedChat) return null;
 
-  // Determine chat display info
-  let chatName = "";
-  let chatAvatar = "/avatar.png";
-  let isOnline = false;
-
-  if (selectedChat.isGroup) {
-    chatName = selectedChat.name || "Group Chat";
-    chatAvatar = "/group-avatar.png";
-  } else {
-    // For 1-to-1 chat, find the other user
-    const otherUser = selectedChat.participants.find(
-      (u) => u._id !== authUser._id
-    );
-    if (otherUser) {
-      chatName = otherUser.fullName || otherUser.username;
-      chatAvatar = otherUser.profilePic || "/avatar.png";
-      isOnline = onlineUsers.includes(otherUser._id);
-    }
-  }
+  // For one-on-one, selectedChat is always the other user
+  const otherUser = selectedChat;
+  const chatName = otherUser.fullName || otherUser.username;
+  const chatAvatar = otherUser.profilePic || "/avatar.png";
+  const isOnline = onlineUsers.includes(otherUser._id);
 
   return (
-    <div className="p-2.5 border-b border-base-300">
+    <div className="p-4 border-b border-gray-200 bg-gray-50">
       <div className="flex items-center justify-between">
+        {/* Left: Avatar + Info */}
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="avatar">
-            <div className="size-10 rounded-full relative">
-              <img src={chatAvatar} alt={chatName} />
-            </div>
+          <div className="w-12 h-12 rounded-full overflow-hidden shadow-md flex-shrink-0">
+            <img
+              src={chatAvatar}
+              alt={chatName}
+              className="w-full h-full object-cover"
+            />
           </div>
 
-          {/* Chat info */}
-          <div>
-            <h3 className="font-medium">{chatName}</h3>
-            {!selectedChat.isGroup && (
-              <p className="text-sm text-base-content/70">
-                {isOnline ? "Online" : "Offline"}
-              </p>
-            )}
+          {/* Chat Info */}
+          <div className="flex flex-col">
+            <h3 className="font-semibold text-gray-800">{chatName}</h3>
+            <p
+              className={`text-sm ${
+                isOnline ? "text-green-500" : "text-gray-400"
+              }`}
+            >
+              {isOnline ? "Online" : "Offline"}
+            </p>
           </div>
         </div>
 
-        {/* Close button */}
-        <button onClick={() => setSelectedChat(null)}>
-          <X />
+        {/* Close Button */}
+        <button
+          onClick={() => setSelectedChat(null)}
+          className="p-2 rounded-full hover:bg-gray-200 transition"
+        >
+          <X className="w-5 h-5 text-gray-600" />
         </button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import {
   Eye,
@@ -12,7 +13,6 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import AuthImagePattern from "../components/AuthImagePattern";
 import toast from "react-hot-toast";
-import { useState } from "react";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -52,17 +52,14 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-gray-50">
+    <div className="min-h-[calc(100vh-4rem)] grid lg:grid-cols-2 bg-gray-50">
       {/* Left Form Section */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-10">
           {/* Header */}
           <div className="text-center">
             <div className="flex flex-col items-center gap-4">
-              <div
-                className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-lg 
-                transition-transform duration-300 hover:scale-105 hover:bg-blue-500 group"
-              >
+              <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-blue-500 group">
                 <MessageSquare className="w-7 h-7 text-blue-500 group-hover:text-white transition-colors duration-300" />
               </div>
               <h1 className="text-3xl font-extrabold mt-2 text-gray-800">

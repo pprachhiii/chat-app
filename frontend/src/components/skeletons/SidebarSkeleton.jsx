@@ -6,15 +6,14 @@ const SidebarSkeleton = () => {
   const statusWidths = ["w-12", "w-14", "w-16"];
 
   return (
-    <aside
-      className="h-full w-20 lg:w-72 border-r border-base-300 
-      flex flex-col transition-all duration-200"
-    >
+    <aside className="h-full w-20 lg:w-72 border-r border-gray-200 flex flex-col transition-all duration-200 bg-gray-50">
       {/* Header */}
-      <div className="border-b border-base-300 w-full p-5">
+      <div className="border-b border-gray-200 w-full p-5">
         <div className="flex items-center gap-2">
-          <Users className="w-6 h-6" />
-          <span className="font-medium hidden lg:block">Contacts</span>
+          <Users className="w-6 h-6 text-gray-600" />
+          <span className="font-medium hidden lg:block text-gray-800">
+            Contacts
+          </span>
         </div>
       </div>
 
@@ -23,19 +22,19 @@ const SidebarSkeleton = () => {
         {skeletonContacts.map((_, idx) => (
           <div key={idx} className="w-full p-3 flex items-center gap-3">
             {/* Avatar skeleton */}
-            <div className="relative mx-auto lg:mx-0">
-              <div className="skeleton size-12 rounded-full animate-pulse" />
+            <div className="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0">
+              <div className="w-full h-full rounded-full animate-pulse bg-gray-300" />
             </div>
 
             {/* User info skeleton - only visible on larger screens */}
-            <div className="hidden lg:block text-left min-w-0 flex-1">
+            <div className="hidden lg:flex flex-col text-left min-w-0 flex-1 gap-2">
               <div
-                className={`skeleton h-4 mb-2 animate-pulse ${
+                className={`h-4 bg-gray-300 rounded animate-pulse ${
                   nameWidths[idx % nameWidths.length]
                 }`}
               />
               <div
-                className={`skeleton h-3 animate-pulse ${
+                className={`h-3 bg-gray-300 rounded animate-pulse ${
                   statusWidths[idx % statusWidths.length]
                 }`}
               />
