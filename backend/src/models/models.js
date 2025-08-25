@@ -48,15 +48,6 @@ const userSchema = new mongoose.Schema(
     contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
-    // -------------------
-    // AUTH & SECURITY
-    // -------------------
-    isVerified: { type: Boolean, default: false },
-
-    // Registration: Email verification link
-    verificationToken: String,
-    verificationTokenExpiry: Date,
-
     // Login: OTP
     loginOTP: String,
     loginOTPExpiry: Date,
@@ -79,7 +70,7 @@ const userSchema = new mongoose.Schema(
 // Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 12); // stronger hashing
+  this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
@@ -143,7 +134,7 @@ const messageSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    fileUrl: String, // for images, files, or voice notes
+    fileUrl: String,
     status: {
       type: String,
       enum: ["sent", "delivered", "read"],

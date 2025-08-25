@@ -2,13 +2,10 @@ import express from "express";
 import {
   signup,
   login,
+  verifyLoginOTP,
   logout,
   checkAuth,
 } from "../controllers/auth.controller.js";
-import {
-  verifyEmail,
-  verifyLoginOTP,
-} from "../controllers/verify.controller.js";
 import {
   forgotPassword,
   resetPassword,
@@ -24,7 +21,6 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/verify-login-otp", verifyLoginOTP);
-router.get("/verify-email/:token", verifyEmail);
 router.post("/forgot-password", forgotPassword); // Send reset token via email
 router.post("/reset-password/:token", resetPassword); // Reset password using token
 

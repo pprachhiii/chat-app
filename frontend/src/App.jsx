@@ -12,7 +12,6 @@ const SignUpPage = lazy(() => import("./pages/SignUp.jsx"));
 const LoginPage = lazy(() => import("./pages/Login.jsx"));
 const SettingsPage = lazy(() => import("./pages/Settings.jsx"));
 const ProfilePage = lazy(() => import("./pages/Profile.jsx"));
-const VerifyEmailPage = lazy(() => import("./pages/VerifyEmail.jsx"));
 const ForgetPasswordPage = lazy(() => import("./pages/ForgetPassword.jsx"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPassword.jsx"));
 const OpVerificationPage = lazy(() => import("./pages/OtpVerifiacton.jsx"));
@@ -108,14 +107,6 @@ const App = () => {
             element={
               <PublicRoute authUser={authUser}>
                 <SignUpPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/verify-email"
-            element={
-              <PublicRoute authUser={authUser}>
-                <VerifyEmailPage />
               </PublicRoute>
             }
           />

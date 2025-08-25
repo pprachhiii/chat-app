@@ -31,30 +31,6 @@ const baseEmailTemplate = (heading, content) => {
 };
 
 // -----------------------
-// Verify Email
-// -----------------------
-export const verifyEmailTemplate = (username, verifyUrl) => {
-  const content = `
-    <h2 style="color:#111827;">Welcome, ${username} 👋</h2>
-    <p style="color:#374151; font-size:15px;">
-      Thank you for signing up. Please confirm your email address to activate your account.
-    </p>
-    <p style="text-align:center; margin:30px 0;">
-      <a href="${verifyUrl}" 
-         style="background:#4f46e5; color:#ffffff; padding:12px 24px; 
-                text-decoration:none; border-radius:6px; font-weight:bold;">
-        Verify Email
-      </a>
-    </p>
-    <p style="color:#6b7280; font-size:13px;">
-      This link will expire in 1 hour. If you didn’t create this account, you can ignore this email.
-    </p>
-  `;
-
-  return baseEmailTemplate("Verify your email", content);
-};
-
-// -----------------------
 // Login OTP
 // -----------------------
 export const loginOtpTemplate = (fullName, otp) => {

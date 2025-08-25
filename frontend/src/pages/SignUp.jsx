@@ -23,7 +23,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
-  const { signup, isSigningUp } = useAuthStore();
+  const { signup, isSigningUp, verifyEmail } = useAuthStore();
 
   const validateForm = () => {
     if (!formData.username.trim()) return toast.error("Username is required");
@@ -41,25 +41,28 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm() !== true) return;
+    if (!validateForm()) return;
     try {
-      await signup(formData);
-      toast.success("Signup successful. Verify your email.");
-      navigate("/verify-email?sent=1");
+      const res = await signup(formData);
+      toast.success("Signup successful. Verify your email from your inbox.");
+
+      // Automatically call verifyEmail if token exists in response
+      if (res?.verificationToken) {
+        await verifyEmail(res.verificationToken);
+      }
+
+      navigate("/login");
     } catch (err) {
-      // store likely handles errors; keep fallback
       if (err?.message) toast.error(err.message);
     }
   };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      {/* left side */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
-          {/* LOGO */}
           <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
+            <div className="flex flex-col items-center gap-2">
               <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <MessageSquare className="size-6 text-primary" />
               </div>
@@ -79,7 +82,7 @@ const SignUpPage = () => {
                 <AtSign className="size-5 text-base-content/40 absolute left-3 top-3" />
                 <input
                   type="text"
-                  className={`input input-bordered w-full pl-10`}
+                  className="input input-bordered w-full pl-10"
                   placeholder="johndoe"
                   value={formData.username}
                   onChange={(e) =>
@@ -100,7 +103,7 @@ const SignUpPage = () => {
                 <User className="size-5 text-base-content/40 absolute left-3 top-3" />
                 <input
                   type="text"
-                  className={`input input-bordered w-full pl-10`}
+                  className="input input-bordered w-full pl-10"
                   placeholder="John Doe"
                   value={formData.fullName}
                   onChange={(e) =>
@@ -118,7 +121,7 @@ const SignUpPage = () => {
                 <Mail className="size-5 text-base-content/40 absolute left-3 top-3" />
                 <input
                   type="email"
-                  className={`input input-bordered w-full pl-10`}
+                  className="input input-bordered w-full pl-10"
                   placeholder="you@example.com"
                   value={formData.email}
                   onChange={(e) =>
@@ -136,7 +139,7 @@ const SignUpPage = () => {
                 <Lock className="size-5 text-base-content/40 absolute left-3 top-3" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  className={`input input-bordered w-full pl-10`}
+                  className="input input-bordered w-full pl-10"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) =>
@@ -183,7 +186,6 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      {/* right side */}
       <AuthImagePattern
         title="Join our community"
         subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
@@ -191,4 +193,5 @@ const SignUpPage = () => {
     </div>
   );
 };
+
 export default SignUpPage;

@@ -6,9 +6,10 @@ import {
   verifyEmailTemplate,
   loginOtpTemplate,
 } from "../lib/emailTemplates.js";
+import { generateToken } from "../lib/utils.js";
 
 // -----------------------
-// SIGNUP (registration + send verification email)
+// SIGNUP
 // -----------------------
 export const signup = async (req, res) => {
   const { username, fullName, email, password } = req.body;
@@ -31,30 +32,18 @@ export const signup = async (req, res) => {
         .json({ message: "Username or Email already exists" });
     }
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-
     const newUser = new User({
       username: username.toLowerCase().trim(),
       fullName: fullName.trim(),
       email: email.toLowerCase().trim(),
       password,
-      isVerified: false,
-      verificationToken,
-      verificationTokenExpiry: Date.now() + 1000 * 60 * 60, // 1 hour
     });
 
     await newUser.save();
 
-    const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
-    await sendEmail(
-      email,
-      "Verify your Chat App account",
-      verifyEmailTemplate(username, verifyUrl)
-    );
-
+    // Signup is successful — no email verification
     res.status(201).json({
-      message:
-        "Signup successful. Please verify your email to activate your account.",
+      message: "Signup successful. You can now log in and receive OTP.",
     });
   } catch (error) {
     console.error("Error in signup:", error.message);
@@ -71,12 +60,6 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ email }).select("+password");
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
-
-    if (!user.isVerified) {
-      return res
-        .status(403)
-        .json({ message: "Please verify your email before logging in." });
-    }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect)
@@ -99,6 +82,44 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in login:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// -----------------------
+// VERIFY LOGIN OTP
+// -----------------------
+export const verifyLoginOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await User.findOne({
+      email,
+      loginOTP: otp,
+      loginOTPExpiry: { $gt: Date.now() },
+    });
+
+    if (!user)
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    user.loginOTP = undefined;
+    user.loginOTPExpiry = undefined;
+    await user.save();
+
+    generateToken(user._id, res);
+
+    res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      bio: user.bio,
+      status: user.status,
+      lastSeen: user.lastSeen,
+    });
+  } catch (error) {
+    console.error("Error in verifyLoginOTP:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

@@ -17,7 +17,7 @@ const Sidebar = () => {
   const filteredChats = showOnlineOnly
     ? chats.filter((chat) =>
         chat.isGroupChat
-          ? true // groups always show
+          ? true
           : chat.users.some(
               (u) => u._id !== authUser._id && onlineUsers.includes(u._id)
             )
@@ -27,12 +27,14 @@ const Sidebar = () => {
   if (isChatsLoading) return <SidebarSkeleton />;
 
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
+    <aside className="h-full w-20 lg:w-72 border-r border-zinc-200 flex flex-col bg-white shadow-md rounded-r-xl transition-all duration-300">
       {/* Header */}
-      <div className="border-b border-base-300 w-full p-5">
+      <div className="border-b border-zinc-200 w-full p-5">
         <div className="flex items-center gap-2">
-          <Users className="size-6" />
-          <span className="font-medium hidden lg:block">Chats</span>
+          <Users className="size-6 text-indigo-500" />
+          <span className="font-semibold hidden lg:block text-indigo-600">
+            Chats
+          </span>
         </div>
 
         {/* Online filter toggle */}
@@ -44,9 +46,9 @@ const Sidebar = () => {
               onChange={(e) => setShowOnlineOnly(e.target.checked)}
               className="checkbox checkbox-sm"
             />
-            <span className="text-sm">Show online only</span>
+            <span className="text-sm text-zinc-600">Show online only</span>
           </label>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-zinc-400">
             ({onlineUsers.length - 1} online)
           </span>
         </div>
@@ -75,10 +77,10 @@ const Sidebar = () => {
               onClick={() => setSelectedChat(chat)}
               className={`
                 w-full p-3 flex items-center gap-3
-                hover:bg-base-300 transition-colors
+                rounded-lg hover:bg-indigo-50 transition-colors duration-200
                 ${
                   selectedChat?._id === chat._id
-                    ? "bg-base-300 ring-1 ring-base-300"
+                    ? "bg-indigo-100 ring-1 ring-indigo-200"
                     : ""
                 }
               `}
@@ -87,19 +89,19 @@ const Sidebar = () => {
                 <img
                   src={profilePic}
                   alt={name}
-                  className="size-12 object-cover rounded-full"
+                  className="size-12 object-cover rounded-full shadow-sm"
                 />
                 {!isGroup && isOnline && (
                   <span
                     className="absolute bottom-0 right-0 size-3 bg-green-500 
-                    rounded-full ring-2 ring-zinc-900"
+                    rounded-full ring-2 ring-white"
                   />
                 )}
               </div>
 
               {/* Chat info - only visible on larger screens */}
               <div className="hidden lg:block text-left min-w-0">
-                <div className="font-medium truncate">{name}</div>
+                <div className="font-medium truncate text-zinc-700">{name}</div>
                 <div className="text-sm text-zinc-400">
                   {isGroup
                     ? `${chat.users.length} members`
@@ -113,7 +115,9 @@ const Sidebar = () => {
         })}
 
         {filteredChats.length === 0 && (
-          <div className="text-center text-zinc-500 py-4">No chats found</div>
+          <div className="text-center text-zinc-400 py-4">
+            No chats found. Try toggling "Show online only"!
+          </div>
         )}
       </div>
     </aside>
