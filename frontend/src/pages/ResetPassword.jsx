@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { Lock, Loader2, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { axiosInstance } from "../lib/axios.js";
 
 const ResetPasswordPage = () => {
   const [search] = useSearchParams();
@@ -18,22 +19,14 @@ const ResetPasswordPage = () => {
       return toast.error("Password must be at least 6 characters");
     if (form.newPassword !== form.retypePassword)
       return toast.error("Passwords do not match");
+
     setLoading(true);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/auth/reset-password/${token}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Failed to reset password");
+      await axiosInstance.post(`/auth/reset-password/${token}`, form);
       setDone(true);
       toast.success("Password reset successful");
-    } catch (e) {
-      toast.error(e.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Password reset failed");
     } finally {
       setLoading(false);
     }
@@ -121,4 +114,5 @@ const ResetPasswordPage = () => {
     </div>
   );
 };
+
 export default ResetPasswordPage;

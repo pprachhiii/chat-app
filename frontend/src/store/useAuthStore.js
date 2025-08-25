@@ -14,6 +14,7 @@ export const useAuthStore = create((set, get) => ({
   isUpdatingProfile: false,
   isCheckingAuth: true,
   isResettingPassword: false,
+  isChangingPassword: false,
   onlineUsers: [],
   socket: null,
 
@@ -31,7 +32,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  // Signup (don’t auto-login, only trigger email verification)
+  // Signup
   signup: async (data) => {
     set({ isSigningUp: true });
     try {
@@ -57,6 +58,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  // Verify Email
   verifyEmail: async (token) => {
     try {
       await axiosInstance.get(`/auth/verify-email/${token}`);
@@ -81,7 +83,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  // Forgot Password
+  // Forgot Password (send reset link)
   forgotPassword: async (data) => {
     try {
       const res = await axiosInstance.post("/auth/forgot-password", data);
@@ -92,7 +94,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  // Reset Password
+  // Reset Password (via token)
   resetPassword: async (token, data) => {
     set({ isResettingPassword: true });
     try {
@@ -102,6 +104,19 @@ export const useAuthStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "Password reset failed");
     } finally {
       set({ isResettingPassword: false });
+    }
+  },
+
+  // Change Password (logged-in user, requires current password)
+  changePassword: async (data) => {
+    set({ isChangingPassword: true });
+    try {
+      await axiosInstance.post("/auth/change-password", data);
+      toast.success("Password changed successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to change password");
+    } finally {
+      set({ isChangingPassword: false });
     }
   },
 

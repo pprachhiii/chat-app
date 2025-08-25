@@ -7,21 +7,23 @@ import Navbar from "./components/Navbar";
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
 
-// ✅ Lazy-loaded pages
-const HomePage = lazy(() => import("./pages/HomePage"));
-const SignUpPage = lazy(() => import("./pages/SignUpPage"));
-const LoginPage = lazy(() => import("./pages/LoginPage"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
-const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
-const ForgetPasswordPage = lazy(() => import("./pages/ForgetPasswordPage"));
-const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
-const OpVerificationPage = lazy(() => import("./pages/OpVerifiactonPage"));
+const HomePage = lazy(() => import("./pages/Home.jsx"));
+const SignUpPage = lazy(() => import("./pages/SignUp.jsx"));
+const LoginPage = lazy(() => import("./pages/Login.jsx"));
+const SettingsPage = lazy(() => import("./pages/Settings.jsx"));
+const ProfilePage = lazy(() => import("./pages/Profile.jsx"));
+const VerifyEmailPage = lazy(() => import("./pages/VerifyEmail.jsx"));
+const ForgetPasswordPage = lazy(() => import("./pages/ForgetPassword.jsx"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPassword.jsx"));
+const OpVerificationPage = lazy(() => import("./pages/OtpVerifiacton.jsx"));
+const ChangePasswordPage = lazy(() => import("./pages/ChangePassword.jsx"));
 
+// Protected route wrapper
 const ProtectedRoute = ({ children, authUser }) => {
   return authUser ? children : <Navigate to="/login" replace />;
 };
 
+// Public route wrapper
 const PublicRoute = ({ children, authUser }) => {
   return !authUser ? children : <Navigate to="/" replace />;
 };
@@ -80,6 +82,14 @@ const App = () => {
             element={
               <ProtectedRoute authUser={authUser}>
                 <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/change-password"
+            element={
+              <ProtectedRoute authUser={authUser}>
+                <ChangePasswordPage />
               </ProtectedRoute>
             }
           />
