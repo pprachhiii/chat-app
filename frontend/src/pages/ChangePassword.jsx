@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 const ChangePasswordPage = () => {
   const { changePassword, isChangingPassword } = useAuthStore();
   const [form, setForm] = useState({
+    username: "",
     currentPassword: "",
     newPassword: "",
     retypePassword: "",
@@ -14,16 +15,19 @@ const ChangePasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (form.newPassword.length < 6) {
+    if (!form.username) return toast.error("Username is required");
+    if (form.newPassword.length < 6)
       return toast.error("New password must be at least 6 characters");
-    }
-
-    if (form.newPassword !== form.retypePassword) {
+    if (form.newPassword !== form.retypePassword)
       return toast.error("Passwords do not match");
-    }
 
     await changePassword(form);
-    setForm({ currentPassword: "", newPassword: "", retypePassword: "" });
+    setForm({
+      username: "",
+      currentPassword: "",
+      newPassword: "",
+      retypePassword: "",
+    });
   };
 
   return (
@@ -34,24 +38,34 @@ const ChangePasswordPage = () => {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Username */}
+          <div className="flex flex-col">
+            <label className="text-gray-500 text-sm mb-2">Username</label>
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              required
+              className="w-full px-4 py-3 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+
           {/* Current Password */}
           <div className="flex flex-col">
             <label className="text-gray-500 text-sm mb-2 flex items-center gap-1">
               <Lock className="w-4 h-4" /> Current Password
             </label>
-            <div className="relative">
-              <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={form.currentPassword}
-                onChange={(e) =>
-                  setForm({ ...form, currentPassword: e.target.value })
-                }
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={form.currentPassword}
+              onChange={(e) =>
+                setForm({ ...form, currentPassword: e.target.value })
+              }
+              required
+              className="w-full px-4 py-3 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
           </div>
 
           {/* New Password */}
@@ -59,39 +73,33 @@ const ChangePasswordPage = () => {
             <label className="text-gray-500 text-sm mb-2 flex items-center gap-1">
               <Lock className="w-4 h-4" /> New Password
             </label>
-            <div className="relative">
-              <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={form.newPassword}
-                onChange={(e) =>
-                  setForm({ ...form, newPassword: e.target.value })
-                }
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={form.newPassword}
+              onChange={(e) =>
+                setForm({ ...form, newPassword: e.target.value })
+              }
+              required
+              className="w-full px-4 py-3 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
           </div>
 
-          {/* Retype New Password */}
+          {/* Retype Password */}
           <div className="flex flex-col">
             <label className="text-gray-500 text-sm mb-2 flex items-center gap-1">
               <Lock className="w-4 h-4" /> Retype New Password
             </label>
-            <div className="relative">
-              <Lock className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={form.retypePassword}
-                onChange={(e) =>
-                  setForm({ ...form, retypePassword: e.target.value })
-                }
-                required
-                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={form.retypePassword}
+              onChange={(e) =>
+                setForm({ ...form, retypePassword: e.target.value })
+              }
+              required
+              className="w-full px-4 py-3 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
           </div>
 
           {/* Submit Button */}

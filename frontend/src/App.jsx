@@ -11,7 +11,6 @@ const SignUpPage = lazy(() => import("./pages/SignUp.jsx"));
 const LoginPage = lazy(() => import("./pages/Login.jsx"));
 const SettingsPage = lazy(() => import("./pages/Settings.jsx"));
 const ProfilePage = lazy(() => import("./pages/Profile.jsx"));
-const ForgetPasswordPage = lazy(() => import("./pages/ForgetPassword.jsx"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPassword.jsx"));
 const ChangePasswordPage = lazy(() => import("./pages/ChangePassword.jsx"));
 
@@ -102,14 +101,6 @@ const App = () => {
               element={
                 <PublicRoute authUser={authUser}>
                   <SignUpPage />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/forgot-password"
-              element={
-                <PublicRoute authUser={authUser}>
-                  <ForgetPasswordPage />
                 </PublicRoute>
               }
             />

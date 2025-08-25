@@ -34,8 +34,6 @@ const userSchema = new mongoose.Schema(
     },
     contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    resetPasswordToken: String,
-    resetPasswordExpiry: Date,
     status: {
       type: String,
       enum: ["online", "offline", "away", "busy"],
@@ -46,12 +44,14 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
+// Compare password method
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
@@ -100,7 +100,4 @@ const messageSchema = new mongoose.Schema(
 
 const Message = mongoose.model("Message", messageSchema);
 
-// =======================
-// EXPORT MODELS
-// =======================
 export { User, Message };

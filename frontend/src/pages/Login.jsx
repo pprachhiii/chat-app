@@ -113,7 +113,7 @@ const LoginPage = () => {
           {/* Links */}
           <div className="flex flex-col items-center text-center mt-2 space-y-2">
             <Link
-              to="/forgot-password"
+              to="/reset-password"
               className="text-blue-500 font-medium hover:underline"
             >
               Forgot password?

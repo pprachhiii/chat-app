@@ -8,6 +8,8 @@ const BASE_URL =
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isLoggingIn: false,
+  isChangingPassword: false,
+  isResettingPassword: false,
   onlineUsers: [],
   socket: null,
 
@@ -26,7 +28,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axiosInstance.post("/auth/login", data); // login sets JWT cookie
+      const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
       get().connectSocket();
       return res.data;
@@ -37,7 +39,7 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await axiosInstance.post("/auth/logout"); // clears cookie on backend
+      await axiosInstance.post("/auth/logout");
     } finally {
       set({ authUser: null });
       get().disconnectSocket();
@@ -61,4 +63,50 @@ export const useAuthStore = create((set, get) => ({
   },
 
   setAuthUser: (user) => set({ authUser: user }),
+
+  // -------------------------
+  // CHANGE PASSWORD
+  // -------------------------
+  changePassword: async ({
+    username,
+    currentPassword,
+    newPassword,
+    retypePassword,
+  }) => {
+    set({ isChangingPassword: true });
+    try {
+      const res = await axiosInstance.post("/auth/change-password", {
+        username,
+        currentPassword,
+        newPassword,
+        retypePassword,
+      });
+      return res.data;
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message);
+      throw err;
+    } finally {
+      set({ isChangingPassword: false });
+    }
+  },
+
+  // -------------------------
+  // RESET PASSWORD
+  // -------------------------
+  resetPassword: async ({ username, newPassword, retypePassword }) => {
+    set({ isResettingPassword: true });
+    try {
+      const res = await axiosInstance.post("/auth/reset-password", {
+        username,
+        newPassword,
+        retypePassword,
+      });
+      return res.data;
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message);
+      throw err;
+    } finally {
+      set({ isResettingPassword: false });
+    }
+  },
 }));

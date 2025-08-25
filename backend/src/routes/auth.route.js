@@ -6,7 +6,6 @@ import {
   checkAuth,
 } from "../controllers/auth.controller.js";
 import {
-  forgotPassword,
   resetPassword,
   changePassword,
 } from "../controllers/password.controller.js";
@@ -19,8 +18,7 @@ const router = express.Router();
 // -----------------------
 router.post("/signup", signup);
 router.post("/login", login);
-router.post("/forgot-password", forgotPassword); // Send reset token via email
-router.post("/reset-password/:token", resetPassword); // Reset password using token
+router.post("/reset-password", resetPassword);
 
 // -----------------------
 // PROTECTED ROUTES
