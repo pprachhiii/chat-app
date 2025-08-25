@@ -1,13 +1,13 @@
 const AuthImagePattern = ({ title, subtitle }) => {
-  const NUM_SHAPES = 25; // Increase number of shapes
+  const NUM_SHAPES = 25;
   const shapes = Array.from({ length: NUM_SHAPES }).map(() => {
-    const size = Math.floor(Math.random() * 40) + 20; // size between 20-60px
-    const top = Math.floor(Math.random() * 90) + "%"; // avoid 100% to stay in container
+    const size = Math.floor(Math.random() * 40) + 20;
+    const top = Math.floor(Math.random() * 90) + "%";
     const left = Math.floor(Math.random() * 90) + "%";
     const colors = [
-      "from-primary/20 to-primary/40",
-      "from-secondary/20 to-secondary/40",
-      "from-accent/20 to-accent/40",
+      "from-blue-400/30 to-blue-600/30",
+      "from-purple-400/30 to-purple-600/30",
+      "from-pink-400/30 to-pink-600/30",
     ];
     const color = colors[Math.floor(Math.random() * colors.length)];
     const animations = [
@@ -20,12 +20,12 @@ const AuthImagePattern = ({ title, subtitle }) => {
   });
 
   return (
-    <div className="hidden lg:flex items-center justify-center bg-gray-50 p-12 relative overflow-hidden">
-      {/* Fun Animated Shapes */}
+    <div className="flex lg:flex-col items-center justify-center bg-gray-50 p-12 relative overflow-visible">
+      {/* Shapes behind */}
       {shapes.map((shape, i) => (
         <div
           key={i}
-          className={`absolute rounded-full bg-gradient-to-br ${shape.color} ${shape.animation}`}
+          className={`absolute rounded-full bg-gradient-to-br ${shape.color} ${shape.animation} z-0`}
           style={{
             width: `${shape.size}px`,
             height: `${shape.size}px`,
@@ -35,7 +35,7 @@ const AuthImagePattern = ({ title, subtitle }) => {
         />
       ))}
 
-      {/* Content */}
+      {/* Text content */}
       <div className="max-w-md text-center relative z-10">
         <h2 className="text-3xl font-extrabold mb-3 text-gray-800">{title}</h2>
         <p className="text-base text-gray-600 leading-relaxed">{subtitle}</p>
