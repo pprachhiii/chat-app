@@ -31,28 +31,6 @@ const baseEmailTemplate = (heading, content) => {
 };
 
 // -----------------------
-// Login OTP
-// -----------------------
-export const loginOtpTemplate = (fullName, otp) => {
-  const content = `
-    <h2 style="color:#111827; text-align:center;">Login Verification</h2>
-    <p style="color:#374151; font-size:15px; text-align:center;">
-      Hello ${fullName}, use the OTP below to complete your login:
-    </p>
-    <h1 style="font-size:36px; letter-spacing:6px; margin:20px 0; 
-               color:#4f46e5; text-align:center;">
-      ${otp}
-    </h1>
-    <p style="color:#6b7280; font-size:13px; text-align:center;">
-      This OTP will expire in 10 minutes.<br/>
-      If this wasn’t you, please reset your password immediately.
-    </p>
-  `;
-
-  return baseEmailTemplate("Your OTP Code", content);
-};
-
-// -----------------------
 // Password Reset Success
 // -----------------------
 export const passwordResetSuccessTemplate = (fullName) => {

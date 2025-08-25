@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
@@ -14,41 +14,20 @@ const SettingsPage = lazy(() => import("./pages/Settings.jsx"));
 const ProfilePage = lazy(() => import("./pages/Profile.jsx"));
 const ForgetPasswordPage = lazy(() => import("./pages/ForgetPassword.jsx"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPassword.jsx"));
-const OpVerificationPage = lazy(() => import("./pages/OtpVerifiacton.jsx"));
 const ChangePasswordPage = lazy(() => import("./pages/ChangePassword.jsx"));
 
-// Protected route wrapper
-const ProtectedRoute = ({ children, authUser }) => {
-  return authUser ? children : <Navigate to="/login" replace />;
-};
-
-// Public route wrapper
-const PublicRoute = ({ children, authUser }) => {
-  return !authUser ? children : <Navigate to="/" replace />;
-};
+const ProtectedRoute = ({ children, authUser }) =>
+  !authUser ? <Navigate to="/login" replace /> : children;
+const PublicRoute = ({ children, authUser }) =>
+  authUser ? <Navigate to="/" replace /> : children;
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
+  const { authUser } = useAuthStore();
   const { theme } = useThemeStore();
-
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
-
-  if (isCheckingAuth && !authUser) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen gap-3">
-        <Loader className="size-10 animate-spin text-primary" />
-        <p className="text-sm text-base-content/70">Loading...</p>
-      </div>
-    );
-  }
 
   return (
     <div data-theme={theme}>
       <Navbar />
-
-      {/* Suspense fallback while lazy pages load */}
       <Suspense
         fallback={
           <div className="flex items-center justify-center h-screen">
@@ -57,7 +36,6 @@ const App = () => {
         }
       >
         <Routes>
-          {/* Protected routes */}
           <Route
             path="/"
             element={
@@ -91,7 +69,6 @@ const App = () => {
             }
           />
 
-          {/* Public routes */}
           <Route
             path="/login"
             element={
@@ -124,20 +101,10 @@ const App = () => {
               </PublicRoute>
             }
           />
-          <Route
-            path="/op-verification"
-            element={
-              <PublicRoute authUser={authUser}>
-                <OpVerificationPage />
-              </PublicRoute>
-            }
-          />
 
-          {/* Catch-all → redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-
       <Toaster position="top-right" />
     </div>
   );

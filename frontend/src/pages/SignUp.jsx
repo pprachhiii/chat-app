@@ -44,9 +44,7 @@ const SignUpPage = () => {
     if (!validateForm()) return;
     try {
       await signup(formData);
-      toast.success(
-        "Signup successful! Welcome aboard. You can now log in and receive OTP."
-      );
+      toast.success("Signup successful!");
       navigate("/login");
     } catch (err) {
       if (err?.message) toast.error(err.message);
@@ -159,7 +157,7 @@ const SignUpPage = () => {
               {isSigningUp ? (
                 <div className="flex items-center justify-center">
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Creating your account...
+                  Loading...
                 </div>
               ) : (
                 "Create Account"

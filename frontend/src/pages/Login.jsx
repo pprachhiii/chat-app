@@ -1,57 +1,59 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import AuthImagePattern from "../components/AuthImagePattern";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // added useNavigate
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import toast from "react-hot-toast";
 
 const LoginPage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // initialize navigate
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const { login, isLoggingIn } = useAuthStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.email.trim()) return toast.error("Email is required");
+    if (!/\S+@\S+\.\S+/.test(formData.email))
+      return toast.error("Invalid email format");
+    if (!formData.password) return toast.error("Password is required");
+
     try {
-      await login(formData); // backend sends OTP (does NOT log in yet)
-      toast.success("OTP sent to your email");
-      navigate("/auth/login/otp", { state: { email: formData.email } });
+      await login(formData); // login with email + password
+      toast.success("Logged in successfully!");
+      navigate("/"); // redirect to home page after login
     } catch (err) {
-      if (err?.message) toast.error(err.message);
+      toast.error(err?.message || "Login failed");
     }
   };
 
   return (
-    <div className="h-screen grid lg:grid-cols-2">
-      {/* Left Side - Form */}
+    <div className="min-h-screen grid lg:grid-cols-2 bg-gray-50">
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <div className="flex flex-col items-center gap-2 group">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <MessageSquare className="w-6 h-6 text-primary" />
+        <div className="w-full max-w-md space-y-10">
+          <div className="text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-blue-500 group">
+                <MessageSquare className="w-7 h-7 text-blue-500 group-hover:text-white transition-colors duration-300" />
               </div>
-              <h1 className="text-2xl font-bold mt-2">Welcome Back</h1>
-              <p className="text-base-content/60">Sign in to your account</p>
+              <h1 className="text-3xl font-extrabold mt-2 text-gray-800">
+                Welcome Back
+              </h1>
+              <p className="text-gray-600 max-w-xs">
+                Explore, experiment, and share your ideas.
+              </p>
             </div>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Email</span>
-              </label>
+            <div className="flex flex-col">
+              <label className="mb-2 font-medium text-gray-700">Email</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-base-content/40" />
-                </div>
+                <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-3" />
                 <input
                   type="email"
-                  className={`input input-bordered w-full pl-10`}
                   placeholder="you@example.com"
+                  className="w-full pl-12 py-3 rounded-2xl bg-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 transition"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
@@ -61,18 +63,14 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Password</span>
-              </label>
+            <div className="flex flex-col">
+              <label className="mb-2 font-medium text-gray-700">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-base-content/40" />
-                </div>
+                <Lock className="w-5 h-5 text-gray-400 absolute left-4 top-3" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  className={`input input-bordered w-full pl-10`}
                   placeholder="••••••••"
+                  className="w-full pl-12 py-3 rounded-2xl bg-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 transition"
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
@@ -85,9 +83,9 @@ const LoginPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-base-content/40" />
+                    <EyeOff className="w-5 h-5 text-gray-400" />
                   ) : (
-                    <Eye className="h-5 w-5 text-base-content/40" />
+                    <Eye className="w-5 h-5 text-gray-400" />
                   )}
                 </button>
               </div>
@@ -95,27 +93,33 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              className="btn btn-primary w-full"
+              className="w-full py-3 rounded-2xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-transform hover:scale-105 shadow-md"
               disabled={isLoggingIn}
             >
               {isLoggingIn ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                <div className="flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
                   Loading...
-                </>
+                </div>
               ) : (
-                "Send OTP"
+                "Sign In"
               )}
             </button>
           </form>
 
-          <div className="flex items-center justify-between text-sm pt-2">
-            <Link to="/forgot-password" className="link link-primary">
+          <div className="flex flex-col items-center text-center mt-2 space-y-2">
+            <Link
+              to="/forgot-password"
+              className="text-blue-500 font-medium hover:underline"
+            >
               Forgot password?
             </Link>
-            <p className="text-base-content/60">
-              Don&apos;t have an account?{" "}
-              <Link to="/signup" className="link link-primary">
+            <p className="text-gray-500">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="text-blue-500 font-medium hover:underline"
+              >
                 Create account
               </Link>
             </p>
@@ -123,14 +127,12 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* Right Side - Image/Pattern */}
       <AuthImagePattern
-        title={"Welcome back!"}
-        subtitle={
-          "Sign in to continue your conversations and catch up with your messages."
-        }
+        title="Welcome back!"
+        subtitle="Dive in, explore, and share your thoughts."
       />
     </div>
   );
 };
+
 export default LoginPage;

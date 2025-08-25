@@ -48,10 +48,6 @@ const userSchema = new mongoose.Schema(
     contacts: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
-    // Login: OTP
-    loginOTP: String,
-    loginOTPExpiry: Date,
-
     // Forgot / Reset password
     resetPasswordToken: String,
     resetPasswordExpiry: Date,
