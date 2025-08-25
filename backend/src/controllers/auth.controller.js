@@ -41,7 +41,6 @@ export const signup = async (req, res) => {
 
     await newUser.save();
 
-    // Signup is successful — no email verification
     res.status(201).json({
       message: "Signup successful. You can now log in and receive OTP.",
     });

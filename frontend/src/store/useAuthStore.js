@@ -35,8 +35,8 @@ export const useAuthStore = create((set, get) => ({
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
-      toast.success("Account created! Check your inbox to verify email.");
-      return res.data; // return response including verification token
+      toast.success("Account created! You can now log in and receive OTP.");
+      return res.data;
     } catch (error) {
       toast.error(error.response?.data?.message || "Signup failed");
       throw error;
@@ -45,15 +45,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  verifyEmail: async (token) => {
-    try {
-      await axiosInstance.get(`/auth/verify-email/${token}`);
-      toast.success("Email verified successfully. You can now log in.");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Email verification failed");
-      throw error;
-    }
-  },
+  // Removed verifyEmail completely
 
   login: async (data) => {
     set({ isLoggingIn: true });

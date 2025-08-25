@@ -23,7 +23,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
   });
-  const { signup, isSigningUp, verifyEmail } = useAuthStore();
+  const { signup, isSigningUp } = useAuthStore(); // Removed verifyEmail
 
   const validateForm = () => {
     if (!formData.username.trim()) return toast.error("Username is required");
@@ -43,14 +43,8 @@ const SignUpPage = () => {
     e.preventDefault();
     if (!validateForm()) return;
     try {
-      const res = await signup(formData);
-      toast.success("Signup successful. Verify your email from your inbox.");
-
-      // Automatically call verifyEmail if token exists in response
-      if (res?.verificationToken) {
-        await verifyEmail(res.verificationToken);
-      }
-
+      await signup(formData);
+      toast.success("Signup successful! You can now log in and receive OTP.");
       navigate("/login");
     } catch (err) {
       if (err?.message) toast.error(err.message);
