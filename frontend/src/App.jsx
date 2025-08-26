@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 
 import Navbar from "./components/Navbar";
 import { useAuthStore } from "./store/useAuthStore";
-import { lazy, useEffect, useState } from "react";
+import { lazy, useEffect, useState, Suspense } from "react";
 
 const HomePage = lazy(() => import("./pages/Home.jsx"));
 const SignUpPage = lazy(() => import("./pages/SignUp.jsx"));
@@ -26,8 +26,13 @@ const App = () => {
 
   useEffect(() => {
     const init = async () => {
-      await restoreSession();
-      setLoadingSession(false);
+      try {
+        await restoreSession();
+      } catch (error) {
+        console.error("Failed to restore session:", error); // Handle 401 gracefully
+      } finally {
+        setLoadingSession(false);
+      }
     };
     init();
   }, [restoreSession]);
