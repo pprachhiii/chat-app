@@ -7,8 +7,8 @@ import { useAuthStore } from "./store/useAuthStore";
 import { lazy, useEffect, useState } from "react";
 
 const HomePage = lazy(() => import("./pages/Home.jsx"));
-const SignUpPage = lazy(() => import("./components/SignUp.jsx"));
-const LoginPage = lazy(() => import("./components/Login.jsx"));
+const SignUpPage = lazy(() => import("./pages/SignUp.jsx"));
+const LoginPage = lazy(() => import("./pages/Login.jsx"));
 const SettingsPage = lazy(() => import("./pages/Settings.jsx"));
 const ProfilePage = lazy(() => import("./pages/Profile.jsx"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPassword.jsx"));
