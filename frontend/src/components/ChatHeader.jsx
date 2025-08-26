@@ -3,48 +3,41 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 
 const ChatHeader = () => {
-  const { selectedChat, setSelectedChat } = useChatStore();
+  const { selectedUser, setSelectedUser } = useChatStore();
   const { onlineUsers } = useAuthStore();
 
-  if (!selectedChat) return null;
-
-  // For one-on-one, selectedChat is always the other user
-  const otherUser = selectedChat;
-  const chatName = otherUser.fullName || otherUser.username;
-  const chatAvatar = otherUser.profilePic || "/avatar.png";
-  const isOnline = onlineUsers.includes(otherUser._id);
+  if (!selectedUser) return null;
 
   return (
-    <div className="p-4 border-b border-gray-200 bg-gray-50">
+    <div className="p-3 border-b border-gray-200 bg-white">
       <div className="flex items-center justify-between">
-        {/* Left: Avatar + Info */}
+        {/* Avatar + User info */}
         <div className="flex items-center gap-3">
-          {/* Avatar */}
-          <div className="w-12 h-12 rounded-full overflow-hidden shadow-md flex-shrink-0">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden">
             <img
-              src={chatAvatar}
-              alt={chatName}
+              src={selectedUser.profilePic || "/avatar.png"}
+              alt={selectedUser.fullName}
               className="w-full h-full object-cover"
             />
+            {onlineUsers.includes(selectedUser._id) && (
+              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white" />
+            )}
           </div>
 
-          {/* Chat Info */}
-          <div className="flex flex-col">
-            <h3 className="font-semibold text-gray-800">{chatName}</h3>
-            <p
-              className={`text-sm ${
-                isOnline ? "text-green-500" : "text-gray-400"
-              }`}
-            >
-              {isOnline ? "Online" : "Offline"}
+          <div>
+            <h3 className="font-medium text-gray-800">
+              {selectedUser.fullName}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
             </p>
           </div>
         </div>
 
-        {/* Close Button */}
+        {/* Close button */}
         <button
-          onClick={() => setSelectedChat(null)}
-          className="p-2 rounded-full hover:bg-gray-200 transition"
+          onClick={() => setSelectedUser(null)}
+          className="p-2 rounded-full hover:bg-gray-100 transition"
         >
           <X className="w-5 h-5 text-gray-600" />
         </button>

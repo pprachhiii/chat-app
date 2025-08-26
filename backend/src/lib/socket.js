@@ -11,7 +11,6 @@ const io = new Server(server, {
   },
 });
 
-// Store online users → { userId: [socketId1, socketId2] }
 const userSocketMap = {};
 
 export function getReceiverSocketId(userId) {
@@ -19,8 +18,6 @@ export function getReceiverSocketId(userId) {
 }
 
 io.on("connection", (socket) => {
-  console.log("🔌 A user connected:", socket.id);
-
   const userId = socket.handshake.query.userId;
   if (userId) {
     if (!userSocketMap[userId]) {
@@ -41,7 +38,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
     if (userId && userSocketMap[userId]) {
       userSocketMap[userId] = userSocketMap[userId].filter(
         (id) => id !== socket.id

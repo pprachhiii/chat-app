@@ -28,7 +28,7 @@ This app provides **secure username/password authentication**, **one-to-one mess
 - **One-to-One Chats Only** 👥.
 - **Multiple Message Types**: text, image, file, voice.
 - **Message Status**: `sent`, `delivered`, `read`.
-- **Advanced Messaging**: reply to messages, reactions, edit/delete messages.
+- **Advanced Messaging**: reply to messages, edit/delete messages.
 - **Cloudinary Integration**: Store media files in Cloudinary, metadata in MongoDB.
 
 ### Real-time Functionality ⚡

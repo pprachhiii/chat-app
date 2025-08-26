@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import {
   Eye,
@@ -13,6 +12,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import AuthImagePattern from "../components/AuthImagePattern";
 import toast from "react-hot-toast";
+import { useState } from "react";
 
 const SignUpPage = () => {
   const navigate = useNavigate();

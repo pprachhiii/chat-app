@@ -1,100 +1,100 @@
-import { Message, User } from "../models/models.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { Message, User } from "../models/models.js";
 
-// -----------------------
-// Get messages between two users
-// -----------------------
+// Get chat messages between logged-in user and another user
 export const getMessages = async (req, res) => {
   try {
-    const userId1 = req.user._id;
-    const { userId2 } = req.params; // the other participant
+    const { id: userToChatId } = req.params;
+    const myId = req.user._id;
 
-    // Fetch messages where either user is sender or receiver
     const messages = await Message.find({
       $or: [
-        { senderId: userId1, receiverId: userId2 },
-        { senderId: userId2, receiverId: userId1 },
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
       ],
     })
-      .sort({ createdAt: 1 }) // oldest first
-      .populate("senderId", "username fullName profilePic status")
-      .populate("replyTo", "text senderId");
-
-    // Mark unread messages as read
-    const unreadMessages = messages.filter(
-      (msg) => msg.senderId._id.toString() === userId2 && msg.status !== "read"
-    );
-    await Promise.all(
-      unreadMessages.map(async (msg) => {
-        msg.status = "read";
-        await msg.save();
-      })
-    );
+      .populate("senderId", "username fullName profilePic")
+      .populate("receiverId", "username fullName profilePic")
+      .populate("replyTo");
 
     res.status(200).json(messages);
   } catch (error) {
-    console.error("Error in getMessages: ", error.message);
+    console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// -----------------------
-// Send a message to a user
-// -----------------------
+// Send a message (text, image, file, etc.)
 export const sendMessage = async (req, res) => {
   try {
+    const { text, image, fileUrl, messageType = "text", replyTo } = req.body;
+    const { id: receiverId } = req.params;
     const senderId = req.user._id;
-    const { receiverId, text, messageType, file } = req.body;
 
-    let fileUrl;
-    if (file) {
-      const uploadResponse = await cloudinary.uploader.upload(file);
-      fileUrl = uploadResponse.secure_url;
+    let uploadedImageUrl = null;
+
+    if (image && messageType === "image") {
+      const uploadResponse = await cloudinary.uploader.upload(image);
+      uploadedImageUrl = uploadResponse.secure_url;
     }
 
     const newMessage = new Message({
       senderId,
       receiverId,
-      messageType: messageType || (file ? "image" : "text"),
+      messageType,
       text: text || "",
-      fileUrl: fileUrl || "",
+      fileUrl: messageType === "image" ? uploadedImageUrl : fileUrl || "",
+      replyTo: replyTo || null,
     });
 
     await newMessage.save();
 
-    // Emit via socket to the receiver
-    const socketId = getReceiverSocketId(receiverId);
-    if (socketId) io.to(socketId).emit("newMessage", newMessage);
+    // Emit real-time message via socket
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
-    const populatedMessage = await newMessage.populate(
-      "senderId",
-      "username fullName profilePic status"
-    );
-    res.status(201).json(populatedMessage);
+    res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Error in sendMessage: ", error.message);
+    console.log("Error in sendMessage controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// -----------------------
-// Edit message
-// -----------------------
+// Edit a message
 export const editMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const { newText } = req.body;
+    const { text, fileUrl } = req.body;
+    const userId = req.user._id;
 
     const message = await Message.findById(messageId);
-    if (!message) return res.status(404).json({ message: "Message not found" });
 
-    if (message.senderId.toString() !== req.user._id.toString())
-      return res.status(403).json({ message: "Unauthorized" });
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
 
-    message.text = newText;
+    // Only sender can edit
+    if (message.senderId.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ error: "You can only edit your own messages" });
+    }
+
+    // Update fields
+    if (text !== undefined) message.text = text;
+    if (fileUrl !== undefined) message.fileUrl = fileUrl;
     message.isEdited = true;
+
     await message.save();
+
+    // Emit real-time update if needed
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageEdited", message);
+    }
 
     res.status(200).json(message);
   } catch (error) {
@@ -103,24 +103,69 @@ export const editMessage = async (req, res) => {
   }
 };
 
-// -----------------------
-// Delete message
-// -----------------------
+// Delete a message (soft delete)
 export const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
+    const userId = req.user._id;
+
     const message = await Message.findById(messageId);
-    if (!message) return res.status(404).json({ message: "Message not found" });
 
-    if (message.senderId.toString() !== req.user._id.toString())
-      return res.status(403).json({ message: "Unauthorized" });
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
 
+    // Only sender can delete
+    if (message.senderId.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ error: "You can only delete your own messages" });
+    }
+
+    // Soft delete
     message.isDeleted = true;
     await message.save();
 
-    res.status(200).json({ message: "Message deleted" });
+    // Emit real-time update if needed
+    const receiverSocketId = getReceiverSocketId(message.receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messageDeleted", message._id);
+    }
+
+    res.status(200).json({ message: "Message deleted successfully" });
   } catch (error) {
     console.error("Error in deleteMessage: ", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Start a chat by username
+export const startChatByUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const myId = req.user._id;
+
+    // Find the user to chat with
+    const userToChat = await User.findOne({
+      username: username.toLowerCase(),
+    }).select("-password");
+    if (!userToChat) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Fetch existing messages, if any
+    const messages = await Message.find({
+      $or: [
+        { senderId: myId, receiverId: userToChat._id },
+        { senderId: userToChat._id, receiverId: myId },
+      ],
+    })
+      .populate("senderId", "username fullName profilePic")
+      .populate("receiverId", "username fullName profilePic");
+
+    res.status(200).json({ user: userToChat, messages });
+  } catch (error) {
+    console.error("Error in startChatByUsername: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

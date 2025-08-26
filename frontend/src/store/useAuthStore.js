@@ -25,6 +25,19 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  signup: async (data) => {
+    set({ isSigningUp: true });
+    try {
+      const res = await axiosInstance.post("/auth/signup", data);
+      return res.data;
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message);
+      throw err;
+    } finally {
+      set({ isSigningUp: false });
+    }
+  },
+
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
@@ -43,6 +56,20 @@ export const useAuthStore = create((set, get) => ({
     } finally {
       set({ authUser: null });
       get().disconnectSocket();
+    }
+  },
+
+  updateProfile: async (data) => {
+    set({ isUpdatingProfile: true });
+    try {
+      const res = await axiosInstance.put("/profile/update", data);
+      set({ authUser: res.data.user });
+      return res.data.user;
+    } catch (err) {
+      console.error(err.response?.data?.message || err.message);
+      throw err;
+    } finally {
+      set({ isUpdatingProfile: false });
     }
   },
 

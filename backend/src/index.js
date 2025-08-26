@@ -34,9 +34,9 @@ app.use(
 // ROUTES
 // -----------------------
 app.use("/api/auth", authRoutes);
-app.use("/api/messages", messageRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/messages", messageRoutes);
 
 // -----------------------
 // SERVE FRONTEND IN PRODUCTION

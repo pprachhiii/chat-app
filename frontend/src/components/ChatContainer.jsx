@@ -1,5 +1,5 @@
 import { useChatStore } from "../store/useChatStore";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
@@ -12,35 +12,38 @@ const ChatContainer = () => {
     messages,
     getMessages,
     isMessagesLoading,
-    selectedChat,
+    selectedUser,
     subscribeToMessages,
     unsubscribeFromMessages,
+    editMessage,
+    deleteMessage,
   } = useChatStore();
+
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
 
-  useEffect(() => {
-    if (selectedChat?._id) {
-      getMessages(selectedChat._id); // fetch messages with this user
-      subscribeToMessages();
-    }
-    return () => unsubscribeFromMessages();
-  }, [
-    selectedChat?._id,
-    getMessages,
-    subscribeToMessages,
-    unsubscribeFromMessages,
-  ]);
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editingText, setEditingText] = useState("");
+  const [menuOpenMessageId, setMenuOpenMessageId] = useState(null);
 
+  // Fetch messages when a user is selected
   useEffect(() => {
-    if (messageEndRef.current && messages.length > 0) {
+    if (!selectedUser) return;
+    getMessages(selectedUser._id);
+    subscribeToMessages();
+    return () => unsubscribeFromMessages();
+  }, [selectedUser, getMessages, subscribeToMessages, unsubscribeFromMessages]);
+
+  // Scroll to bottom when messages update
+  useEffect(() => {
+    if (messageEndRef.current && messages) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
   if (isMessagesLoading) {
     return (
-      <div className="flex-1 flex flex-col overflow-auto bg-gray-50">
+      <div className="flex-1 flex flex-col overflow-auto">
         <ChatHeader />
         <MessageSkeleton />
         <MessageInput />
@@ -48,13 +51,12 @@ const ChatContainer = () => {
     );
   }
 
-  if (!selectedChat) {
-    return (
-      <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
-        Select a chat to start messaging
-      </div>
-    );
-  }
+  const handleEditSave = (messageId) => {
+    if (!editingText.trim()) return;
+    editMessage(messageId, { text: editingText });
+    setEditingMessageId(null);
+    setEditingText("");
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-auto bg-gray-50">
@@ -62,98 +64,129 @@ const ChatContainer = () => {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => {
-          const isOwnMessage = message.senderId._id === authUser._id;
+          // Compare IDs safely even if senderId is populated
+          const messageSenderId = message.senderId?._id || message.senderId;
+          const isAuthUser = String(messageSenderId) === String(authUser._id);
+
+          const isEditing = editingMessageId === message._id;
+          const isMenuOpen = menuOpenMessageId === message._id;
 
           return (
             <div
               key={message._id}
-              ref={messageEndRef}
-              className={`flex flex-col ${
-                isOwnMessage ? "items-end" : "items-start"
+              className={`flex items-end gap-3 ${
+                isAuthUser ? "justify-end" : "justify-start"
               }`}
+              ref={messageEndRef}
             >
-              {/* Avatar */}
-              <div className="flex items-center mb-1 gap-2">
-                {!isOwnMessage && (
-                  <div className="w-10 h-10 rounded-full overflow-hidden shadow-md flex-shrink-0">
-                    <img
-                      src={message.senderId.profilePic || "/avatar.png"}
-                      alt={message.senderId.username}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
+              {/* Avatar for other user */}
+              {!isAuthUser && (
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300">
+                  <img
+                    src={selectedUser?.profilePic?.url || "/avatar.png"}
+                    alt={selectedUser?.fullName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
 
-                <div className="flex flex-col text-sm">
-                  <span className="font-medium text-gray-800">
-                    {isOwnMessage ? "You" : message.senderId.username}
-                  </span>
-                  <time className="text-xs text-gray-400">
-                    {formatMessageTime(message.createdAt)}
-                  </time>
+              <div className="flex flex-col max-w-xs sm:max-w-md relative">
+                <time className="text-xs text-gray-400 mb-1">
+                  {formatMessageTime(message.createdAt)}
+                </time>
+
+                {/* Message bubble */}
+                <div
+                  className={`flex flex-col p-3 rounded-2xl break-words ${
+                    isAuthUser
+                      ? "bg-blue-500 text-white self-end"
+                      : "bg-white text-gray-800 shadow"
+                  }`}
+                >
+                  {message.fileUrl && (
+                    <img
+                      src={message.fileUrl}
+                      alt="Attachment"
+                      className="sm:max-w-[200px] rounded-md mb-2"
+                    />
+                  )}
+
+                  {isEditing ? (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        className={`p-1 border-none flex-1 ${
+                          isAuthUser ? "bg-blue-500 text-white" : "bg-gray-100"
+                        }`}
+                      />
+                      <button
+                        onClick={() => handleEditSave(message._id)}
+                        className="text-sm text-black"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditingMessageId(null)}
+                        className="text-sm text-red-600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <p>{message.text}</p>
+                  )}
                 </div>
 
-                {isOwnMessage && (
-                  <div className="w-10 h-10 rounded-full overflow-hidden shadow-md flex-shrink-0">
-                    <img
-                      src={authUser.profilePic || "/avatar.png"}
-                      alt="You"
-                      className="w-full h-full object-cover"
-                    />
+                {/* 3-dot menu for auth user */}
+                {isAuthUser && !isEditing && (
+                  <div className="absolute top-0 right-0">
+                    <button
+                      onClick={() =>
+                        setMenuOpenMessageId(isMenuOpen ? null : message._id)
+                      }
+                      className="text-gray-400 hover:text-gray-700 px-2"
+                    >
+                      ⋮
+                    </button>
+                    {isMenuOpen && (
+                      <div className="absolute right-0 mt-2 bg-white shadow rounded border w-24 z-10">
+                        <button
+                          onClick={() => {
+                            setEditingMessageId(message._id);
+                            setEditingText(message.text);
+                            setMenuOpenMessageId(null);
+                          }}
+                          className="block w-full text-left px-2 py-1 hover:bg-gray-100"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            deleteMessage(message._id);
+                            setMenuOpenMessageId(null);
+                          }}
+                          className="block w-full text-left px-2 py-1 hover:bg-gray-100 text-red-500"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Message bubble */}
-              <div
-                className={`max-w-[70%] p-3 rounded-2xl shadow-md text-gray-800 break-words ${
-                  isOwnMessage
-                    ? "bg-blue-500 text-white rounded-br-none"
-                    : "bg-white rounded-bl-none"
-                }`}
-              >
-                {message.isDeleted ? (
-                  <p className="italic text-gray-400">
-                    This message was deleted
-                  </p>
-                ) : (
-                  <>
-                    {message.messageType === "image" && message.fileUrl && (
-                      <img
-                        src={message.fileUrl}
-                        alt="Attachment"
-                        className="rounded-md mb-2 max-w-full"
-                      />
-                    )}
-                    {message.messageType === "file" && message.fileUrl && (
-                      <a
-                        href={message.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 underline mb-2 block"
-                      >
-                        📎 Download File
-                      </a>
-                    )}
-                    {message.messageType === "voice" && message.fileUrl && (
-                      <audio controls className="mb-2 w-full">
-                        <source src={message.fileUrl} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    )}
-                    {message.text && (
-                      <p>
-                        {message.text}
-                        {message.isEdited && (
-                          <span className="ml-1 text-xs text-gray-400">
-                            (edited)
-                          </span>
-                        )}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
+              {/* Avatar for auth user */}
+              {isAuthUser && (
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300">
+                  <img
+                    src={authUser?.profilePic?.url || "/avatar.png"}
+                    alt={authUser?.fullName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </div>
           );
         })}
