@@ -1,4 +1,3 @@
----
 # Real-time One-to-One Chat App 💬
 
 A **full-stack real-time chat application** built with **React**, **Express.js**, **Socket.IO**, and **MongoDB** 💻.
@@ -121,6 +120,5 @@ Licensed under the MIT License. See the [LICENSE](LICENSE) file.
 - Ensure MongoDB and Cloudinary credentials are set correctly.
 - Backend must run before frontend for real-time messaging to work.
 
----
 
 ---
