@@ -1,9 +1,7 @@
 # Real-time One-to-One Chat App 💬
 
-A **full-stack real-time chat application** built with **React**, **Express.js**, **Socket.IO**, and **MongoDB** 💻.
+A **full-stack real-time chat application** built with **React**, **Express.js**, **Socket.IO**, and **MongoDB** 💻. This app provides **secure username/password authentication**, **one-to-one messaging**, **media sharing**, **user presence**, and **profile management**, ready to deploy on platforms like Ender 🚀.
 
-This app provides **secure username/password authentication**, **one-to-one messaging**, **media sharing**, **user presence**, and **profile management**, ready to deploy on platforms like Ender 🚀.
----
 
 ## Key Features 🔑
 
